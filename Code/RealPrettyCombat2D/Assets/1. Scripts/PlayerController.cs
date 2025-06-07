@@ -40,6 +40,9 @@ public class PlayerController : MonoBehaviour
         float speed = sprintAction.IsPressed() ? sprintspeed : movespeed;
         float velX = rigidbody.linearVelocityX = moveAction.ReadValue<float>() * speed;
         animator.SetBool("IsMove", velX != 0);
+        animator.SetBool("IsSprint", sprintAction.IsPressed());
+        if (velX < 0) transform.localScale = new Vector3(-1 , 1, 1);
+        if (velX > 0) transform.localScale = new Vector3(1, 1, 1);
     }
 
     public void OnGroundedBoxEnter(Collider2D collision)
@@ -55,6 +58,7 @@ public class PlayerController : MonoBehaviour
     private void SetGrounded(bool value)
     {
         this.isGrounded = value;
+        animator.SetBool("IsGround", isGrounded);
         if (this.isGrounded)
         {
             jumpCount = maxJumpCount;
@@ -79,7 +83,9 @@ public class PlayerController : MonoBehaviour
             //Button Down
             if (jumpCount <= 0) return;
 
+            SetGrounded(false);
             rigidbody.linearVelocityY = jumpforce;
+            animator.SetTrigger("Jump");
 
             jumpCount--;
         }
