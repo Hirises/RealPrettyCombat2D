@@ -70,7 +70,9 @@ public class PlayerController : MonoBehaviour
         if(context.phase == InputActionPhase.Performed)
         {
             //Button Down
-        }else if(context.phase == InputActionPhase.Canceled)
+            animator.SetTrigger("NormalAttack");
+        }
+        else if(context.phase == InputActionPhase.Canceled)
         {
             //Button Up
         }
