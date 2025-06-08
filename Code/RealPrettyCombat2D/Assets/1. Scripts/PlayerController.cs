@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     private new Rigidbody2D rigidbody;
     [SerializeField]
     private Animator animator;
+    [SerializeField]
+    private ParticleSystem doubleJumpParticle;
 
     [SerializeField]
     private float movespeed;
@@ -88,6 +90,13 @@ public class PlayerController : MonoBehaviour
             SetGrounded(false);
             rigidbody.linearVelocityY = jumpforce;
             animator.SetTrigger("Jump");
+
+            if (jumpCount < maxJumpCount)  //더블점프 파티클
+            {
+                var particle = Instantiate(doubleJumpParticle);
+                particle.transform.position = transform.position;
+                particle.Play();
+            }
 
             jumpCount--;
         }
