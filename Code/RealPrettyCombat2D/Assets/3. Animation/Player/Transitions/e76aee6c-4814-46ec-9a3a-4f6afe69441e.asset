@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b39990bb1392e984cacf978a1a11123f, type: 3}
+  m_Name: e76aee6c-4814-46ec-9a3a-4f6afe69441e
+  m_EditorClassIdentifier: 
+  From:
+  - Idle
+  - Walk
+  - Sprint
+  To: NormalAttack1
+  Conditions:
+  - Type: 0
+    UniqueId: NormalAttack
+    BoolCondition_Ture: 0
+    NumericCondition_EquationType: 0
+    IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0
+  - Type: 2
+    UniqueId: ComboCount
+    BoolCondition_Ture: 0
+    NumericCondition_EquationType: 2
+    IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0

@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.32); height: 40px; margin-top: 1px; margin-bottom: 1px; margin-right: 2px; margin-left: 2px;">
+        <ui:Label text="Default State" style="-unity-text-align: middle-center; width: 100%; height: 100%; -unity-font-style: bold; background-color: rgba(255, 255, 255, 0.04); font-size: 15px;" />
+    </ui:VisualElement>
+</ui:UXML>
