@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f1bb894b8f3a874fb69b8c95d3dd3e1, type: 3}
   m_Name: PlayerFSM
   m_EditorClassIdentifier: 
-  BaseState: {fileID: 0}
+  BaseState: {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
   States:
   - {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
-  Transitions: []
+  - {fileID: 11400000, guid: 829fa1b16f1a43147bec0d338046e45e, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: 34e5c93e171c6614aa063c339accf4ff, type: 2}
+  - {fileID: 11400000, guid: 4bfc210a2eccd9a46ad370ad9ba64424, type: 2}
   Variables:
     reorderableList:
       canAdd: 1
@@ -23,7 +26,7 @@ MonoBehaviour:
       draggable: 1
       expandable: 1
       multipleSelection: 1
-      isExpanded: 0
+      isExpanded: 1
       label:
         m_Text: Keys
         m_Image: {fileID: 0}
@@ -39,7 +42,9 @@ MonoBehaviour:
       elementNameOverride: 
       elementIcon: {fileID: 0}
     reqReferences: {fileID: 0}
-    isExpanded: 0
-    _keyValues: []
-    _keys: []
-    _values: 
+    isExpanded: 1
+    _keyValues:
+    - IsMove
+    _keys:
+    - IsMove
+    _values: 01000000

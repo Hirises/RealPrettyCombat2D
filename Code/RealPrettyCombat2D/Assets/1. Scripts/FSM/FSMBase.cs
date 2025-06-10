@@ -20,11 +20,14 @@ namespace Assets._1._Scripts
 
         private Dictionary<FSMState, List<FSMTransition>> TransitionMap;
         private Dictionary<string, object> VariableMap = new Dictionary<string, object>();
+        private Animator Anim;
 
         private FSMState CurrentState;
 
-        public void Awake()
+        public void Init(Animator anim)
         {
+            this.Anim = anim;
+
             TransitionMap = new Dictionary<FSMState, List<FSMTransition>>();
             foreach(var t in Transitions)
             {
@@ -75,6 +78,14 @@ namespace Assets._1._Scripts
         private void PerformTransition(FSMTransition transition)
         {
             CurrentState = transition.To;
+            Debug.Log($"Change State To {CurrentState.UniqueName}");
+
+            Anim.Play(CurrentState.UniqueName);
+        }
+
+        public void SetVariable(string name, object value)
+        {
+            VariableMap[name] = value;
         }
     }
 }

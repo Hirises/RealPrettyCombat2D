@@ -24,6 +24,7 @@ public class FSMManagerWindow : EditorWindow
     private ListView stateList;
     private ListView inTransitionList;
     private ListView outTransitionList;
+    private List<VisualElement> TabButtonList = new List<VisualElement>();
 
     //--------------------------------------------------------------
 
@@ -42,7 +43,7 @@ public class FSMManagerWindow : EditorWindow
 
 
         //FSM 선택 이벤트 등록
-        var targetFSMSelector = rootVisualElement.Q<ObjectField>();
+        var targetFSMSelector = rootVisualElement.Q<ObjectField>("FSM");
         targetFSMSelector.RegisterValueChangedCallback(OnTargetFSMChange);
 
 
@@ -76,17 +77,31 @@ public class FSMManagerWindow : EditorWindow
         removeOutTransBtn.clicked += RemoveTransition;
 
         //텝 선택 이벤트 등록
+        var fsmTab = rootVisualElement.Q<VisualElement>("FSMTabButton");
+        fsmTab.RegisterCallback<ClickEvent>((e) => SetTab("FSM"));
+        fsmTab.style.opacity = 0.5f;
+        TabButtonList.Add(fsmTab);
         var stateTab = rootVisualElement.Q<VisualElement>("StateTabButton");
-        stateTab.RegisterCallback<ClickEvent>(OnStateTabClick);
+        stateTab.RegisterCallback<ClickEvent>((e) => SetTab("State"));
+        stateTab.style.opacity = 0.5f;
+        TabButtonList.Add(stateTab);
         var transitionTab = rootVisualElement.Q<VisualElement>("TransitionTabButton");
-        transitionTab.RegisterCallback<ClickEvent>(OnTransitionTabClick);
+        transitionTab.RegisterCallback<ClickEvent>((e) => SetTab("Transition"));
+        transitionTab.style.opacity = 0.5f;
+        TabButtonList.Add(transitionTab);
+        var varTab = rootVisualElement.Q<VisualElement>("VariablesTabButton");
+        varTab.RegisterCallback<ClickEvent>((e) => SetTab("Variables"));
+        varTab.style.opacity = 0.5f;
+        TabButtonList.Add(varTab);
+        rootVisualElement.Q<VisualElement>("FSMTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
         rootVisualElement.Q<VisualElement>("StateTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
         rootVisualElement.Q<VisualElement>("TransitionTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        rootVisualElement.Q<VisualElement>("VariablesTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
 
         //초기화
-        SetCurState(null);
-        SetCurTranstition(null);
-        SetTab("StateTab");
+        SetTab("FSM");
+        SetCurFSM(null);
+
     } 
     #endregion
 
@@ -94,11 +109,18 @@ public class FSMManagerWindow : EditorWindow
     #region FSM
     private void OnTargetFSMChange(ChangeEvent<Object> evt)
     {
-        fsm = evt.newValue as FSMBase;
+        SetCurFSM(evt.newValue as FSMBase);
+    }
+
+    private void SetCurFSM(FSMBase value)
+    {
+        fsm = value;
         var stateList = rootVisualElement.Q<ListView>("StateList");
         var inTransitionList = rootVisualElement.Q<ListView>("InTransitionList");
         var outTransitionList = rootVisualElement.Q<ListView>("OutTransitionList");
-        if (evt.newValue.IsUnityNull())
+        var fsmTab = rootVisualElement.Q<VisualElement>($"FSMTab");
+        var inspector = rootVisualElement.Q<VisualElement>($"InspectorCol");
+        if (value.IsUnityNull())
         {
             fsm = null;
             basePath = "Assets";
@@ -110,9 +132,11 @@ public class FSMManagerWindow : EditorWindow
             outTransitionList.itemsSource = null;
             inTransitionList.Rebuild();
             outTransitionList.Rebuild();
+            inspector.visible = false;
             return;
         }
 
+        inspector.visible = true;
         basePath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(fsm));
         stateList.bindItem = (e, i) =>
         {
@@ -122,16 +146,21 @@ public class FSMManagerWindow : EditorWindow
         stateList.makeItem = () => stateList.itemTemplate.Instantiate();
         inTransitionList.bindItem = (e, i) =>
         {
-            e.Q<Label>().text = $"From {(outTransitionList.itemsSource[i] as FSMTransition).To.UniqueName}";
+            var item = inTransitionList.itemsSource[i] as FSMTransition;
+            if (item.From.Equals(curState)) e.Q<Label>().text = $"From Self";
+            else e.Q<Label>().text = $"From {item.From.UniqueName}";
         };
         inTransitionList.makeItem = () => inTransitionList.itemTemplate.Instantiate();
         outTransitionList.bindItem = (e, i) =>
         {
-            e.Q<Label>().text = $"To {(outTransitionList.itemsSource[i] as FSMTransition).To.UniqueName}";
+            var item = outTransitionList.itemsSource[i] as FSMTransition;
+            if (item.To.Equals(curState)) e.Q<Label>().text = $"To Self";
+            else e.Q<Label>().text = $"To {item.To.UniqueName}";
         };
         inTransitionList.makeItem = () => outTransitionList.itemTemplate.Instantiate();
         SetCurState(null);
         SetCurTranstition(null);
+        fsmTab.Bind(new SerializedObject(fsm));
     }
     #endregion
 
@@ -177,27 +206,23 @@ public class FSMManagerWindow : EditorWindow
     private void SetCurState(FSMState state)
     {
         curState = state;
-        var inspector = rootVisualElement.Q<VisualElement>("InspectorCol");
         var transitionbaselable = rootVisualElement.Q<Label>("CurStateName");
-        var stateList = rootVisualElement.Q<ListView>("StateList");
-        var inTransitionList = rootVisualElement.Q<ListView>("InTransitionList");
-        var outTransitionList = rootVisualElement.Q<ListView>("OutTransitionList");
         inTransitionList.ClearSelection();
         outTransitionList.ClearSelection();
         if (curState == null)
         {
-            inspector.visible = false;
             stateList.ClearSelection();
             SetCurTranstition(null);
+            if(curTab.name.StartsWith("State") || curTab.name.StartsWith("Transition")) SetTab("FSM");
             return;
         }
-        inspector.visible = true;
+        var stateTab = rootVisualElement.Q<VisualElement>($"StateTab");
         var serializedState = new SerializedObject(curState);
-        inspector.Bind(serializedState);
+        stateTab.Bind(serializedState);
         transitionbaselable.text = curState.UniqueName;
         SetCurTranstition(null);
-
         UpdateTransitionList();
+        if (!curTab.name.StartsWith("State") && !curTab.name.StartsWith("Transition")) SetTab("State");
     }
 
 
@@ -221,8 +246,8 @@ public class FSMManagerWindow : EditorWindow
             return;
         }
 
-        if (!inTransitionList.selectedItem.Equals(curTransition)) inTransitionList.ClearSelection();
-        if (!outTransitionList.selectedItem.Equals(curTransition)) outTransitionList.ClearSelection();
+        if (!isInTrans) inTransitionList.ClearSelection();
+        if (isInTrans) outTransitionList.ClearSelection();
 
         SetCurTranstition(list.First() as FSMTransition);
     }
@@ -232,16 +257,20 @@ public class FSMManagerWindow : EditorWindow
         if (fsm == null) return;
 
         var nTrans = ScriptableObject.CreateInstance<FSMTransition>();
-        nTrans.To = curState;
-        nTrans.From = fsm.BaseState;
+        nTrans.From = isInTrans ? fsm.BaseState : curState;
+        nTrans.To = isInTrans ? curState : fsm.BaseState;
+
         if (!Directory.Exists($"{basePath}/Transitions"))
         {
             Directory.CreateDirectory($"{basePath}/Transitions");
         }
         AssetDatabase.CreateAsset(nTrans, $"{basePath}/Transitions/{System.Guid.NewGuid()}.asset");
+
         fsm.Transitions.Add(nTrans);
         UpdateTransitionList();
-        inTransitionList.SetSelection(inTransitionList.itemsSource.IndexOf(nTrans));
+
+        if(isInTrans) inTransitionList.SetSelection(inTransitionList.itemsSource.IndexOf(nTrans));
+        else outTransitionList.SetSelection(outTransitionList.itemsSource.IndexOf(nTrans));
     }
 
     private void RemoveTransition()
@@ -266,14 +295,12 @@ public class FSMManagerWindow : EditorWindow
             {
                 outT.Add(t);
             }
-            else if (t.To.Equals(curState))
+            if (t.To.Equals(curState))
             {
                 inT.Add(t);
             }
         }
 
-        var inTransitionList = rootVisualElement.Q<ListView>("InTransitionList");
-        var outTransitionList = rootVisualElement.Q<ListView>("OutTransitionList");
         inTransitionList.itemsSource = inT;
         outTransitionList.itemsSource = outT;
     }
@@ -290,8 +317,9 @@ public class FSMManagerWindow : EditorWindow
 
         var obj = new SerializedObject(curTransition);
         InspectorElement.FillDefaultInspector(inspector, obj, null);
+        bool IsSelfTrans = transtition.To.Equals(transtition.From);
         bool IsOutTrans = transtition.From.Equals(curState);
-        SetPropertyFieldBindings(inspector, obj, IsOutTrans ? "From" : "To");
+        SetPropertyFieldBindings(inspector, obj, IsSelfTrans ? "" : (IsOutTrans ? "From" : "To"));
     }
 
     private void SetPropertyFieldBindings(VisualElement container, SerializedObject serializedObject, string omitField)
@@ -310,16 +338,6 @@ public class FSMManagerWindow : EditorWindow
     #endregion
 
     #region Tab
-    private void OnStateTabClick(ClickEvent e)
-    {
-        SetTab("StateTab");
-    }
-
-    private void OnTransitionTabClick(ClickEvent e)
-    {
-        SetTab("TransitionTab");
-    }
-
     private void SetTab(string tabName)
     {
         if (curTab != null)
@@ -327,8 +345,12 @@ public class FSMManagerWindow : EditorWindow
             curTab.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
         }
 
-        curTab = rootVisualElement.Q<VisualElement>(tabName);
+        curTab = rootVisualElement.Q<VisualElement>($"{tabName}Tab");
         curTab.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+        foreach(var btn in TabButtonList)
+        {
+            btn.style.opacity = btn.name.StartsWith(tabName) ? 1f : 0.5f;
+        }
     } 
     #endregion
 }

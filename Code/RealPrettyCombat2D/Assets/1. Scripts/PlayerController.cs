@@ -12,6 +12,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     [SerializeField]
     private ParticleSystem doubleJumpParticle;
+    [SerializeField]
+    private FSMRunner FSM;
 
     [SerializeField]
     private float movespeed;
@@ -42,6 +44,7 @@ public class PlayerController : MonoBehaviour
         float speed = sprintAction.IsPressed() ? sprintspeed : movespeed;
         float velX = rigidbody.linearVelocityX = moveAction.ReadValue<float>() * speed;
         animator.SetBool("IsMove", velX != 0);
+        FSM.SetBool("IsMove", velX != 0);
         animator.SetBool("IsSprint", sprintAction.IsPressed());
         if (velX < 0) transform.localScale = new Vector3(-1 , 1, 1);
         if (velX > 0) transform.localScale = new Vector3(1, 1, 1);

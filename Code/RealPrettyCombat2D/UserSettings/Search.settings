@@ -69,6 +69,7 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"type: FSMSTat"
 	"type: animationcl"
 ]
 searchItemFavorites = [

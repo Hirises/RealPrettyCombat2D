@@ -9,7 +9,5 @@ namespace Assets._1._Scripts
     {
         [SerializeField]
         public string UniqueName;
-        [SerializeField]
-        public AnimationClip Animation;
     }
 }

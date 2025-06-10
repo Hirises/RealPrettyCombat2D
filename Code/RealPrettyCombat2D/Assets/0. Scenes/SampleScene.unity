@@ -1424,6 +1424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1869956320}
   - component: {fileID: 1869956322}
+  - component: {fileID: 1869956326}
   - component: {fileID: 1869956321}
   - component: {fileID: 1869956323}
   - component: {fileID: 1869956324}
@@ -1496,6 +1497,7 @@ MonoBehaviour:
   rigidbody: {fileID: 1869956321}
   animator: {fileID: 1869956324}
   doubleJumpParticle: {fileID: 14760508956132185, guid: caa6d11c1380e4c4f929b4c69c07e1b2, type: 3}
+  FSM: {fileID: 1869956326}
   movespeed: 4
   sprintspeed: 7
   jumpforce: 12
@@ -1580,7 +1582,7 @@ Animator:
   m_GameObject: {fileID: 1869956319}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c234cf71f29a5e843880c7900686c10c, type: 2}
+  m_Controller: {fileID: 9100000, guid: 87bb29fac8e35a24fad3ce9ad251c08b, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1592,6 +1594,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1869956326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1869956319}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ffd310ad9349564fa87c913584f401e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FSM: {fileID: 11400000, guid: fb719ac168ca1df418e257eaa83a5219, type: 2}
+  anim: {fileID: 1869956324}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

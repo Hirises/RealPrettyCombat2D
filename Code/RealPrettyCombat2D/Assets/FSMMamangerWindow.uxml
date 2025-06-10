@@ -1,29 +1,41 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
     <ui:VisualElement name="Base" style="flex-grow: 1; width: 100%; height: 100%; min-width: 500px; min-height: 250px;">
-        <ui:VisualElement name="Selector" style="flex-grow: 0; width: 100%; height: 20px; flex-shrink: 0; flex-direction: row; margin-bottom: 3px;">
-            <uie:ObjectField label="Target FSM" type="Assets._1._Scripts.FSMBase, Assembly-CSharp" />
-        </ui:VisualElement>
         <ui:VisualElement name="Content" style="flex-grow: 1; flex-direction: row;">
-            <ui:VisualElement name="StatesCol" style="flex-grow: 0; flex-shrink: 0; flex-basis: auto; background-color: rgba(204, 93, 93, 0.32); min-width: 130px; width: 150px;">
-                <ui:VisualElement style="flex-grow: 0; width: auto; height: 35px; flex-direction: row; padding-top: 3px; padding-bottom: 3px; padding-right: 1px; padding-left: 1px;">
-                    <ui:Button text="Add&#10;" name="Add" style="flex-shrink: 1; flex-grow: 1; flex-basis: 50%;" />
-                    <ui:Button text="Remove" name="Remove" selectable="false" style="flex-grow: 1; flex-shrink: 1; flex-basis: 50%;" />
+            <ui:VisualElement name="StatesCol" style="flex-grow: 0; flex-shrink: 0; flex-basis: auto; background-color: rgba(133, 133, 133, 0.32); min-width: 130px; width: 260px;">
+                <uie:ObjectField label="Target FSM" type="Assets._1._Scripts.FSMBase, Assembly-CSharp" name="FSM" style="width: auto; margin-top: 3px; margin-bottom: 3px;" />
+                <ui:VisualElement style="flex-grow: 1; background-color: rgb(103, 68, 68);">
+                    <ui:Label text="States List" style="-unity-text-align: middle-center; font-size: 15px; -unity-font-style: bold; margin-top: 5px; background-color: rgba(0, 0, 0, 0);" />
+                    <ui:VisualElement style="flex-grow: 0; width: auto; height: 35px; flex-direction: row; padding-top: 3px; padding-bottom: 3px; padding-right: 1px; padding-left: 1px;">
+                        <ui:Button text="Add&#10;" name="Add" style="flex-shrink: 1; flex-grow: 1; flex-basis: 50%;" />
+                        <ui:Button text="Remove" name="Remove" selectable="false" style="flex-grow: 1; flex-shrink: 1; flex-basis: 50%;" />
+                    </ui:VisualElement>
+                    <ui:ListView virtualization-method="DynamicHeight" fixed-item-height="40" name="StateList" item-template="project://database/Assets/FSMMamangerWindow_StateItem.uxml?fileID=9197481963319205126&amp;guid=184a4621a94e947438f6546de52442e3&amp;type=3#FSMMamangerWindow_StateItem" style="flex-grow: 1; background-color: rgba(255, 255, 255, 0.12); padding-top: 1px; padding-bottom: 1px;" />
                 </ui:VisualElement>
-                <ui:ListView virtualization-method="DynamicHeight" fixed-item-height="40" name="StateList" item-template="project://database/Assets/FSMMamangerWindow_StateItem.uxml?fileID=9197481963319205126&amp;guid=184a4621a94e947438f6546de52442e3&amp;type=3#FSMMamangerWindow_StateItem" style="flex-grow: 1; background-color: rgba(255, 255, 255, 0.12); padding-top: 1px; padding-bottom: 1px;" />
             </ui:VisualElement>
             <ui:VisualElement name="InspectorCol" style="flex-grow: 1; flex-direction: column;">
                 <ui:VisualElement name="Tab" style="flex-grow: 0; flex-shrink: 0; height: 25px; background-color: rgba(0, 0, 0, 0.18); flex-direction: row;">
-                    <ui:VisualElement enabled="true" name="StateTabButton" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(194, 186, 250, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px;">
+                    <ui:VisualElement enabled="true" name="FSMTabButton" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(255, 97, 126, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px; opacity: 0.5;">
+                        <ui:Label text="FSM" enabled="true" style="-unity-text-align: middle-center; height: 100%; font-size: 16px; -unity-font-style: bold;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement enabled="true" name="StateTabButton" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(194, 186, 250, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px; opacity: 0.5;">
                         <ui:Label text="State" enabled="true" style="-unity-text-align: middle-center; height: 100%; font-size: 16px; -unity-font-style: bold;" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="TransitionTabButton" enabled="true" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(196, 250, 186, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px;">
-                        <ui:Label text="Transition" enabled="true" style="-unity-text-align: middle-center; height: 100%; font-size: 16px; -unity-font-style: bold;" />
+                    <ui:VisualElement name="TransitionTabButton" enabled="true" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(196, 250, 186, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px; opacity: 0.5;">
+                        <ui:Label text="Transitions" enabled="true" style="-unity-text-align: middle-center; height: 100%; font-size: 16px; -unity-font-style: bold;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="VariablesTabButton" enabled="true" style="flex-grow: 0; height: 100%; width: 100px; -unity-background-image-tint-color: rgba(255, 255, 255, 0); background-color: rgba(239, 141, 215, 0.28); border-top-left-radius: 5px; border-top-right-radius: 5px; opacity: 0.5;">
+                        <ui:Label text="Variables" enabled="true" style="-unity-text-align: middle-center; height: 100%; font-size: 16px; -unity-font-style: bold;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-grow: 1; flex-direction: column; padding-top: 0;">
-                    <ui:VisualElement name="StateTab" style="flex-grow: 0.7; flex-shrink: 1; flex-basis: auto; background-color: rgba(87, 85, 103, 0.37); width: 100%; height: 100%; overflow: visible; flex-direction: column; padding-top: 5px; display: flex; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                    <ui:VisualElement name="FSMTab" style="flex-grow: 0.7; flex-shrink: 1; flex-basis: auto; background-color: rgba(184, 127, 129, 0.37); width: 100%; height: 100%; overflow: visible; flex-direction: column; padding-top: 5px; display: flex; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                        <uie:ObjectField label="BaseState" data-source-type="Assets._1._Scripts.FSMState, Assembly-CSharp" type="Assets._1._Scripts.FSMState, Assembly-CSharp" binding-path="BaseState" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="StateTab" style="flex-grow: 0.7; flex-shrink: 1; flex-basis: auto; background-color: rgba(87, 85, 103, 0.37); width: 100%; height: 100%; overflow: visible; flex-direction: column; padding-top: 5px; display: none; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                         <ui:TextField label="UniqueName" placeholder-text="DefaultState" data-source-path="UniqueName" binding-path="UniqueName" name="UniqueNameField" style="padding-bottom: 0; height: auto;" />
-                        <uie:ObjectField label="Animation" type="UnityEngine.AnimationClip, UnityEngine.AnimationModule" binding-path="Animation" />
+                        <ui:VisualElement style="flex-grow: 0; flex-shrink: 0; height: 35px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-left-color: rgba(0, 0, 0, 0.36); border-right-color: rgba(0, 0, 0, 0.36); border-top-color: rgba(0, 0, 0, 0.36); border-bottom-color: rgba(0, 0, 0, 0.36); background-color: rgba(0, 0, 0, 0.11);">
+                            <ui:Label text="이름은 상태들 간에 중복되지 않는 고유한 값이여야하며, Animator를 통해 재생할 애니메이션의 이름과 동일해야합니다." style="width: 100%; height: 100%; -unity-text-align: middle-left; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; color: rgb(196, 196, 196);" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="TransitionTab" enabled="true" style="flex-grow: 1; flex-shrink: 0.3; flex-basis: auto; background-color: rgba(107, 136, 119, 0.3); width: 100%; display: none; flex-direction: row;">
                         <ui:VisualElement name="TransitionList" style="flex-grow: 1; width: 50%;">
@@ -50,6 +62,19 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement name="TransitionInfo" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="VariablesTab" enabled="true" style="flex-grow: 1; flex-shrink: 0.3; flex-basis: auto; background-color: rgba(164, 112, 154, 0.3); width: 100%; display: none; flex-direction: row;">
+                        <ui:VisualElement style="flex-grow: 1; width: 50%;">
+                            <ui:VisualElement style="flex-grow: 0; height: 35px; flex-shrink: 0; width: 100%; flex-direction: row; align-items: center; align-self: center; margin-bottom: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                                <ui:Label text="Variables" style="height: 100%; width: 50%; flex-grow: 1; flex-shrink: 1; -unity-text-align: middle-left; margin-right: 0; padding-right: 0; padding-left: 5px; font-size: 15px;" />
+                                <ui:Button text="Add" name="AddVar" style="width: 60px; height: 90%; justify-content: center; margin-bottom: 1px;" />
+                                <ui:Button text="Remove" name="RemoveVar" style="width: 60px; height: 90%; justify-content: center; align-self: center; flex-direction: column;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement style="flex-grow: 1; padding-top: 0; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; flex-basis: 0%;">
+                                <ui:ListView name="VariableList" virtualization-method="DynamicHeight" fixed-item-height="40" item-template="project://database/Assets/FSMMamangerWindow_VariableItem.uxml?fileID=9197481963319205126&amp;guid=d0ba78b3d0214294dbabb8feff61645b&amp;type=3#FSMMamangerWindow_VariableItem" style="height: 100%; background-color: rgba(0, 0, 0, 0.12); padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="VariableInfo" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
