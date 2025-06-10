@@ -74,12 +74,17 @@
                                 <ui:ListView name="VariableList" virtualization-method="DynamicHeight" fixed-item-height="40" item-template="project://database/Assets/FSMMamangerWindow_VariableItem.uxml?fileID=9197481963319205126&amp;guid=d0ba78b3d0214294dbabb8feff61645b&amp;type=3#FSMMamangerWindow_VariableItem" style="height: 100%; background-color: rgba(0, 0, 0, 0.12); padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="VariableInfo" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
-                            <ui:TextField label="Text Field" placeholder-text="filler text" />
-                            <ui:EnumField label="Enum" value="Center" type="Assets._1._Scripts.FSMCondition+FSMConditionVariableType, Assembly-CSharp" />
-                            <ui:IntegerField label="Integer Field" value="42" />
-                            <ui:FloatField label="Float Field" value="42.2" />
-                            <ui:Toggle label="Toggle" />
+                        <ui:VisualElement enabled="true" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; visibility: visible; display: flex;">
+                            <ui:VisualElement name="VariableInfo" style="flex-grow: 1; display: flex; visibility: visible;">
+                                <ui:TextField label="Name" placeholder-text="DefaultVariable" />
+                                <ui:VisualElement style="flex-grow: 0; flex-shrink: 0; height: 35px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-left-color: rgba(0, 0, 0, 0.36); border-right-color: rgba(0, 0, 0, 0.36); border-top-color: rgba(0, 0, 0, 0.36); border-bottom-color: rgba(0, 0, 0, 0.36); background-color: rgba(0, 0, 0, 0.11);">
+                                    <ui:Label text="이름은 변수들 간에 중복되지 않는 고유한 값이어야 합니다." style="width: 100%; height: 100%; -unity-text-align: middle-left; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; color: rgb(196, 196, 196);" />
+                                </ui:VisualElement>
+                                <ui:EnumField label="Type" value="Bool" type="Assets._1._Scripts.FSMCondition+FSMConditionVariableType, Assembly-CSharp" />
+                                <ui:IntegerField label="Inital Value" value="0" />
+                                <ui:FloatField label="Inital Value" value="0" />
+                                <ui:Toggle label="Inital Value" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

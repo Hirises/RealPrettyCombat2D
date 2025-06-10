@@ -20,6 +20,7 @@ public class FSMManagerWindow : EditorWindow
     private FSMState curState;
     private FSMTransition curTransition;
     private VisualElement curTab;
+    private FSMBase.VarItem curVar;
 
     private ListView stateList;
     private ListView inTransitionList;
@@ -98,6 +99,7 @@ public class FSMManagerWindow : EditorWindow
 
         //VariableList Ã£±â
         varList = rootVisualElement.Q<ListView>("VariableList");
+        varList.selectionChanged += OnSelectVar;
         varList.bindItem = BindVar;
         varList.makeItem = varList.itemTemplate.Instantiate;
 
@@ -157,6 +159,7 @@ public class FSMManagerWindow : EditorWindow
             basePath = "Assets";
             SetCurState(null);
             SetCurTranstition(null);
+            SetCurVar(null);
             stateList.itemsSource = null;
             stateList.Rebuild();
             inTransitionList.itemsSource = null;
@@ -175,7 +178,7 @@ public class FSMManagerWindow : EditorWindow
         basePath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(fsm));
         SetCurState(null);
         SetCurTranstition(null);
-        UpdateVarList();
+        SetCurVar(null);
         fsmTab.Bind(new SerializedObject(fsm));
     }
     #endregion
@@ -201,7 +204,7 @@ public class FSMManagerWindow : EditorWindow
         {
             Directory.CreateDirectory($"{basePath}/States");
         }
-        AssetDatabase.CreateAsset(nState, $"{basePath}/States/{System.Guid.NewGuid()}.asset");
+        AssetDatabase.CreateAsset(nState, $"{basePath}/States/{nState.UniqueName}_____{System.Guid.NewGuid()}.asset");
         fsm.States.Add(nState);
         stateList.Rebuild();
         stateList.SetSelection(fsm.States.IndexOf(nState));
@@ -238,6 +241,10 @@ public class FSMManagerWindow : EditorWindow
         var stateTab = rootVisualElement.Q<VisualElement>($"StateTab");
         var serializedState = new SerializedObject(curState);
         stateTab.Bind(serializedState);
+        stateTab.Q<TextField>("UniqueNameField").RegisterCallback((FocusOutEvent e) =>
+        {
+            AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(curState), $"{curState.UniqueName}_____{System.Guid.NewGuid()}");
+        });
         transitionbaselable.text = curState.UniqueName;
         SetCurTranstition(null);
         UpdateTransitionList();
@@ -365,19 +372,96 @@ public class FSMManagerWindow : EditorWindow
     #endregion
 
     #region Variables
+    private void OnSelectVar(IEnumerable<object> list)
+    {
+        if (list == null || list.Count() == 0)
+        {
+            SetCurVar(null);
+            return;
+        }
+        SetCurVar(list.First() as FSMBase.VarItem);
+    }
+
+    private void SetCurVar(FSMBase.VarItem item)
+    {
+        curVar = item;
+        var e = rootVisualElement.Q<VisualElement>("VariableInfo");
+        if (curVar == null)
+        {
+            e.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+            return;
+        }
+        e.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+        var name = e.Q<TextField>();
+        name.value = curVar.Name;
+        name.RegisterValueChangedCallback((evt) =>
+        {
+            curVar.Name = name.value;
+            varList.Rebuild();
+        });
+        var type = e.Q<EnumField>();
+        type.value = curVar.Type;
+        type.RegisterValueChangedCallback((evt) =>
+        {
+            if (curVar.Type == (FSMCondition.FSMConditionVariableType)evt.newValue) return;
+            curVar.Type = (FSMCondition.FSMConditionVariableType)evt.newValue;
+            varList.Rebuild();
+            RebuildVarInfo();
+        });
+
+        RebuildVarInfo();
+    }
+
+    private void RebuildVarInfo()
+    {
+        if (curVar == null) return;
+
+        var e = rootVisualElement.Q<VisualElement>("VariableInfo");
+        var intF = e.Q<IntegerField>();
+        intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        intF.value = curVar.Base_Int;
+        intF.RegisterValueChangedCallback((evt) =>
+        {
+            curVar.Base_Int = evt.newValue;
+            varList.Rebuild();
+        });
+        var floatF = e.Q<FloatField>();
+        floatF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        floatF.value = curVar.Base_Float;
+        floatF.RegisterValueChangedCallback((evt) =>
+        {
+            curVar.Base_Float = evt.newValue;
+            varList.Rebuild();
+        });
+        var boolF = e.Q<Toggle>();
+        boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        boolF.value = curVar.Base_Bool;
+        boolF.RegisterValueChangedCallback((evt) =>
+        {
+            curVar.Base_Bool = evt.newValue;
+            varList.Rebuild();
+        });
+        switch (curVar.Type)
+        {
+            case FSMCondition.FSMConditionVariableType.Trigger:
+                break;
+            case FSMCondition.FSMConditionVariableType.Int:
+                intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+            case FSMCondition.FSMConditionVariableType.Float:
+                floatF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+            case FSMCondition.FSMConditionVariableType.Bool:
+                boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+        }
+    }
+
     private void BindVar(VisualElement e, int i)
     {
         var item = varList.itemsSource[i] as FSMBase.VarItem;
         var name = e.Q<Label>();
         name.text = item.Name;
-        var type = e.Q<EnumField>();
-        type.value = item.Type;
-        type.RegisterValueChangedCallback((evt) =>
-        {
-            if (item.Type == (FSMCondition.FSMConditionVariableType)evt.newValue) return;
-            item.Type = (FSMCondition.FSMConditionVariableType)evt.newValue;
-            varList.Rebuild();
-        });
 
         var intF = e.Q<IntegerField>();
         intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
@@ -385,6 +469,7 @@ public class FSMManagerWindow : EditorWindow
         intF.RegisterValueChangedCallback((evt) =>
         {
             item.Base_Int = evt.newValue;
+            RebuildVarInfo();
         });
         var floatF = e.Q<FloatField>();
         floatF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
@@ -392,6 +477,7 @@ public class FSMManagerWindow : EditorWindow
         floatF.RegisterValueChangedCallback((evt) =>
         {
             item.Base_Float = evt.newValue;
+            RebuildVarInfo();
         });
         var boolF = e.Q<Toggle>();
         boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
@@ -399,11 +485,11 @@ public class FSMManagerWindow : EditorWindow
         boolF.RegisterValueChangedCallback((evt) =>
         {
             item.Base_Bool = evt.newValue;
+            RebuildVarInfo();
         });
         switch (item.Type)
         {
             case FSMCondition.FSMConditionVariableType.Trigger:
-                boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
                 break;
             case FSMCondition.FSMConditionVariableType.Int:
                 intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
@@ -427,6 +513,7 @@ public class FSMManagerWindow : EditorWindow
         inst.Base_Bool = false;
         fsm.Variables.Add(inst);
         varList.Rebuild();
+        varList.SetSelection(varList.itemsSource.IndexOf(inst));
     }
 
     private void RemoveVar()
@@ -435,7 +522,6 @@ public class FSMManagerWindow : EditorWindow
         if (sel == null) return;
 
         fsm.Variables.Remove(sel);
-        varList.ClearSelection();
         varList.Rebuild();
     } 
     #endregion
