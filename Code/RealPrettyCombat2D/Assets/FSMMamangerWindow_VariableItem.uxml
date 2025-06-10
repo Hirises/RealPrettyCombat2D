@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
     <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0.1); margin-bottom: 3px; height: 40px; flex-shrink: 0; flex-direction: row;">
         <ui:Label text="Var1" style="height: 100%; background-color: rgba(255, 255, 255, 0); color: rgb(255, 255, 255); -unity-text-align: middle-left; font-size: 20px; flex-grow: 1; flex-shrink: 1; padding-right: 3px; padding-left: 5px;" />
-        <ui:EnumField label="Type" value="Center" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" style="align-items: center; flex-grow: 0; flex-shrink: 0; flex-basis: 200px;" />
+        <ui:EnumField label="Type" value="Center" type="Assets._1._Scripts.FSMCondition+FSMConditionVariableType, Assembly-CSharp" style="align-items: center; flex-grow: 0; flex-shrink: 0; flex-basis: 200px;" />
         <ui:IntegerField label="Inital Value" value="42" style="align-items: center; flex-shrink: 0; flex-grow: 0; display: none; flex-basis: 200px;" />
         <ui:FloatField label="InialValue" value="42.2" style="align-items: center; flex-grow: 0; flex-shrink: 0; display: flex; flex-basis: 200px;" />
         <ui:Toggle label="IntialValue" style="align-items: center; flex-shrink: 0; flex-grow: 0; flex-basis: 200px; display: none;" />

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using RotaryHeart.Lib.SerializableDictionary;
+using System;
 
 namespace Assets._1._Scripts
 {
@@ -16,13 +17,37 @@ namespace Assets._1._Scripts
         [SerializeField]
         public List<FSMTransition> Transitions = new List<FSMTransition>();
         [SerializeField]
-        public SerializableDictionaryBase<string, FSMCondition.FSMConditionVariableType> Variables = new SerializableDictionaryBase<string, FSMCondition.FSMConditionVariableType>();
+        public List<VarItem> Variables = new List<VarItem>();
 
         private Dictionary<FSMState, List<FSMTransition>> TransitionMap;
         private Dictionary<string, object> VariableMap = new Dictionary<string, object>();
         private Animator Anim;
 
         private FSMState CurrentState;
+
+        #region class VarItem
+        [Serializable]
+        public class VarItem
+        {
+            [SerializeField]
+            public string Name;
+            [SerializeField]
+            public FSMCondition.FSMConditionVariableType Type;
+            [ShowIf(nameof(FSMCondition.FSMConditionVariableType), FSMCondition.FSMConditionVariableType.Int)]
+            [AllowNesting]
+            [SerializeField]
+            public int Base_Int;
+            [ShowIf(nameof(FSMCondition.FSMConditionVariableType), FSMCondition.FSMConditionVariableType.Float)]
+            [AllowNesting]
+            [SerializeField]
+            public float Base_Float;
+            [ShowIf(nameof(FSMCondition.FSMConditionVariableType), FSMCondition.FSMConditionVariableType.Bool)]
+            [AllowNesting]
+            [SerializeField]
+            public bool Base_Bool;
+        } 
+        #endregion
+
 
         public void Init(Animator anim)
         {
@@ -39,14 +64,13 @@ namespace Assets._1._Scripts
                 TransitionMap[state].Add(t);
             }
 
-            foreach (var v in Variables.Keys)
+            foreach (var v in Variables)
             {
-                VariableMap.Add(v, Variables[v] switch
-                {
-                    FSMCondition.FSMConditionVariableType.Trigger => false,
-                    FSMCondition.FSMConditionVariableType.Bool => false,
-                    FSMCondition.FSMConditionVariableType.Int => 0,
-                    FSMCondition.FSMConditionVariableType.Float => 0f,
+                VariableMap.Add(v.Name, v.Type switch { 
+                    FSMCondition.FSMConditionVariableType.Bool => v.Base_Bool,
+                    FSMCondition.FSMConditionVariableType.Int => v.Base_Int,
+                    FSMCondition.FSMConditionVariableType.Float => v.Base_Float,
+                    FSMCondition.FSMConditionVariableType.Trigger => true,
                     _ => null
                 });
             }

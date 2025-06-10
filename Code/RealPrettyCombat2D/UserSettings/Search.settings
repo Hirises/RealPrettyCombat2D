@@ -69,6 +69,8 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"type: FSMcon"
+	"type: FSMBa"
 	"type: FSMSTat"
 	"type: animationcl"
 ]

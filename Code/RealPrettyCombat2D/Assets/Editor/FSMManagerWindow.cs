@@ -24,6 +24,7 @@ public class FSMManagerWindow : EditorWindow
     private ListView stateList;
     private ListView inTransitionList;
     private ListView outTransitionList;
+    private ListView varList;
     private List<VisualElement> TabButtonList = new List<VisualElement>();
 
     //--------------------------------------------------------------
@@ -50,6 +51,11 @@ public class FSMManagerWindow : EditorWindow
         //State 선택 이벤트 등록
         stateList = rootVisualElement.Q<ListView>("StateList");
         stateList.selectionChanged += OnSelectState;
+        stateList.bindItem = (e, i) =>
+        {
+            e.Q<Label>().text = $"{(stateList.itemsSource[i] as FSMState).UniqueName}";
+        };
+        stateList.makeItem = () => stateList.itemTemplate.Instantiate();
 
         //State 추가&제거 이벤트 등록
         var addState = rootVisualElement.Q<Button>("Add");
@@ -65,6 +71,20 @@ public class FSMManagerWindow : EditorWindow
         outTransitionList = rootVisualElement.Q<ListView>("OutTransitionList");
         inTransitionList.selectionChanged += (list) => OnSelectTransition(list, isInTrans: true);
         outTransitionList.selectionChanged += (list) => OnSelectTransition(list, isInTrans: false);
+        inTransitionList.bindItem = (e, i) =>
+        {
+            var item = inTransitionList.itemsSource[i] as FSMTransition;
+            if (item.From.Equals(curState)) e.Q<Label>().text = $"From Self";
+            else e.Q<Label>().text = $"From {item.From.UniqueName}";
+        };
+        inTransitionList.makeItem = inTransitionList.itemTemplate.Instantiate;
+        outTransitionList.bindItem = (e, i) =>
+        {
+            var item = outTransitionList.itemsSource[i] as FSMTransition;
+            if (item.To.Equals(curState)) e.Q<Label>().text = $"To Self";
+            else e.Q<Label>().text = $"To {item.To.UniqueName}";
+        };
+        inTransitionList.makeItem = outTransitionList.itemTemplate.Instantiate;
 
         //Transition 추가&제거 이벤트 등록
         var addInTransBtn = rootVisualElement.Q<Button>("AddInTrans");
@@ -75,6 +95,17 @@ public class FSMManagerWindow : EditorWindow
         addOutTransBtn.clicked += () => AddTransition(isInTrans: false);
         var removeOutTransBtn = rootVisualElement.Q<Button>("RemoveOutTrans");
         removeOutTransBtn.clicked += RemoveTransition;
+
+        //VariableList 찾기
+        varList = rootVisualElement.Q<ListView>("VariableList");
+        varList.bindItem = BindVar;
+        varList.makeItem = varList.itemTemplate.Instantiate;
+
+        //Variable 추가&제거 이벤트 등록
+        var addVarBtn = rootVisualElement.Q<Button>("AddVar");
+        addVarBtn.clicked += AddVar;
+        var removeVarBtn = rootVisualElement.Q<Button>("RemoveVar");
+        removeVarBtn.clicked += RemoveVar;
 
         //텝 선택 이벤트 등록
         var fsmTab = rootVisualElement.Q<VisualElement>("FSMTabButton");
@@ -133,33 +164,18 @@ public class FSMManagerWindow : EditorWindow
             inTransitionList.Rebuild();
             outTransitionList.Rebuild();
             inspector.visible = false;
+            varList.itemsSource = null;
+            varList.Rebuild();
             return;
         }
 
+        stateList.itemsSource = fsm.States;
+        varList.itemsSource = fsm.Variables;
         inspector.visible = true;
         basePath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(fsm));
-        stateList.bindItem = (e, i) =>
-        {
-            e.Q<Label>().text = $"{(stateList.itemsSource[i] as FSMState).UniqueName}";
-        };
-        stateList.itemsSource = fsm.States;
-        stateList.makeItem = () => stateList.itemTemplate.Instantiate();
-        inTransitionList.bindItem = (e, i) =>
-        {
-            var item = inTransitionList.itemsSource[i] as FSMTransition;
-            if (item.From.Equals(curState)) e.Q<Label>().text = $"From Self";
-            else e.Q<Label>().text = $"From {item.From.UniqueName}";
-        };
-        inTransitionList.makeItem = () => inTransitionList.itemTemplate.Instantiate();
-        outTransitionList.bindItem = (e, i) =>
-        {
-            var item = outTransitionList.itemsSource[i] as FSMTransition;
-            if (item.To.Equals(curState)) e.Q<Label>().text = $"To Self";
-            else e.Q<Label>().text = $"To {item.To.UniqueName}";
-        };
-        inTransitionList.makeItem = () => outTransitionList.itemTemplate.Instantiate();
         SetCurState(null);
         SetCurTranstition(null);
+        UpdateVarList();
         fsmTab.Bind(new SerializedObject(fsm));
     }
     #endregion
@@ -207,15 +223,18 @@ public class FSMManagerWindow : EditorWindow
     {
         curState = state;
         var transitionbaselable = rootVisualElement.Q<Label>("CurStateName");
+        var removeState = rootVisualElement.Q<Button>("Remove");
         inTransitionList.ClearSelection();
         outTransitionList.ClearSelection();
         if (curState == null)
         {
+            removeState.enabledSelf = false;
             stateList.ClearSelection();
             SetCurTranstition(null);
             if(curTab.name.StartsWith("State") || curTab.name.StartsWith("Transition")) SetTab("FSM");
             return;
         }
+        removeState.enabledSelf = true;
         var stateTab = rootVisualElement.Q<VisualElement>($"StateTab");
         var serializedState = new SerializedObject(curState);
         stateTab.Bind(serializedState);
@@ -240,14 +259,22 @@ public class FSMManagerWindow : EditorWindow
     #region Transition
     private void OnSelectTransition(IEnumerable<object> list, bool isInTrans)
     {
+        var removeInTransBtn = rootVisualElement.Q<Button>("RemoveInTrans");
+        var removeOutTransBtn = rootVisualElement.Q<Button>("RemoveOutTrans");
+
         if (list == null || list.Count() == 0)
         {
+            removeInTransBtn.enabledSelf = false;
+            removeOutTransBtn.enabledSelf = false;
             SetCurTranstition(null);
             return;
         }
 
         if (!isInTrans) inTransitionList.ClearSelection();
         if (isInTrans) outTransitionList.ClearSelection();
+
+        if (isInTrans) removeInTransBtn.enabledSelf = true;
+        if (!isInTrans) removeOutTransBtn.enabledSelf = true;
 
         SetCurTranstition(list.First() as FSMTransition);
     }
@@ -335,6 +362,82 @@ public class FSMManagerWindow : EditorWindow
             }
         }
     }
+    #endregion
+
+    #region Variables
+    private void BindVar(VisualElement e, int i)
+    {
+        var item = varList.itemsSource[i] as FSMBase.VarItem;
+        var name = e.Q<Label>();
+        name.text = item.Name;
+        var type = e.Q<EnumField>();
+        type.value = item.Type;
+        type.RegisterValueChangedCallback((evt) =>
+        {
+            if (item.Type == (FSMCondition.FSMConditionVariableType)evt.newValue) return;
+            item.Type = (FSMCondition.FSMConditionVariableType)evt.newValue;
+            varList.Rebuild();
+        });
+
+        var intF = e.Q<IntegerField>();
+        intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        intF.value = item.Base_Int;
+        intF.RegisterValueChangedCallback((evt) =>
+        {
+            item.Base_Int = evt.newValue;
+        });
+        var floatF = e.Q<FloatField>();
+        floatF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        floatF.value = item.Base_Float;
+        floatF.RegisterValueChangedCallback((evt) =>
+        {
+            item.Base_Float = evt.newValue;
+        });
+        var boolF = e.Q<Toggle>();
+        boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
+        boolF.value = item.Base_Bool;
+        boolF.RegisterValueChangedCallback((evt) =>
+        {
+            item.Base_Bool = evt.newValue;
+        });
+        switch (item.Type)
+        {
+            case FSMCondition.FSMConditionVariableType.Trigger:
+                boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+            case FSMCondition.FSMConditionVariableType.Int:
+                intF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+            case FSMCondition.FSMConditionVariableType.Float:
+                floatF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+            case FSMCondition.FSMConditionVariableType.Bool:
+                boolF.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.Flex);
+                break;
+        }
+    }
+
+    private void AddVar()
+    {
+        if (fsm == null) return;
+
+        var inst = new FSMBase.VarItem();
+        inst.Name = "New Variable";
+        inst.Type = FSMCondition.FSMConditionVariableType.Bool;
+        inst.Base_Bool = false;
+        fsm.Variables.Add(inst);
+        varList.Rebuild();
+    }
+
+    private void RemoveVar()
+    {
+        var sel = varList.selectedItem as FSMBase.VarItem;
+        if (sel == null) return;
+
+        fsm.Variables.Remove(sel);
+        varList.ClearSelection();
+        varList.Rebuild();
+    } 
     #endregion
 
     #region Tab
