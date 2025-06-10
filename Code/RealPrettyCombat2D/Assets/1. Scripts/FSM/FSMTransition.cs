@@ -10,9 +10,11 @@ namespace Assets._1._Scripts
     public class FSMTransition : ScriptableObject
     {
         [SerializeField]
-        public string[] From;
+        public FSMState From;
         [SerializeField]
-        public string To;
+        public FSMState To;
+        [SerializeField]
+        public int priority;
         [SerializeField]
         public FSMCondition[] Conditions;
 

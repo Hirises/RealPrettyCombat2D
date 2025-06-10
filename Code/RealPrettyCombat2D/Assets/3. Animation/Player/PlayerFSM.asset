@@ -7,18 +7,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f1bb894b8f3a874fb69b8c95d3dd3e1, type: 3}
   m_Name: PlayerFSM
   m_EditorClassIdentifier: 
-  BaseState: 
+  BaseState: {fileID: 0}
   States:
-  - {fileID: 11400000, guid: a31fd25839b84f247848431c70535df1, type: 2}
-  - {fileID: 11400000, guid: ad796a85b41623f4083a71a652b44c9d, type: 2}
-  Transitions:
-  - {fileID: 11400000, guid: a0c42ee5c3e2d0a4593dc215c5455f71, type: 2}
-  - {fileID: 11400000, guid: 341020287820a1443bd7dff3798cf26c, type: 2}
+  - {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
+  Transitions: []
   Variables:
     reorderableList:
       canAdd: 1

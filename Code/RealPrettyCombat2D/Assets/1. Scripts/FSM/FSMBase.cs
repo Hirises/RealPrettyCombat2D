@@ -10,7 +10,7 @@ namespace Assets._1._Scripts
     public class FSMBase : ScriptableObject
     {
         [SerializeField]
-        public string BaseState;
+        public FSMState BaseState;
         [SerializeField]
         public List<FSMState> States = new List<FSMState>();
         [SerializeField]
@@ -18,44 +18,22 @@ namespace Assets._1._Scripts
         [SerializeField]
         public SerializableDictionaryBase<string, FSMCondition.FSMConditionVariableType> Variables = new SerializableDictionaryBase<string, FSMCondition.FSMConditionVariableType>();
 
-        private Dictionary<string, List<FSMTransition>> TransitionMap;
-        private List <FSMTransition> GenericTransitions;
-        private Dictionary<string, FSMState> StateMap = new Dictionary<string, FSMState>();
+        private Dictionary<FSMState, List<FSMTransition>> TransitionMap;
         private Dictionary<string, object> VariableMap = new Dictionary<string, object>();
 
         private FSMState CurrentState;
 
-        private void CreateStateMap()
-        {
-            StateMap = new Dictionary<string, FSMState>();
-            foreach (var s in States)
-            {
-                StateMap.Add(s.UniqueName, s);
-            }
-        }
-
         public void Awake()
         {
-            CreateStateMap();
-
-            GenericTransitions = new List<FSMTransition>();
-            TransitionMap = new Dictionary<string, List<FSMTransition>>();
+            TransitionMap = new Dictionary<FSMState, List<FSMTransition>>();
             foreach(var t in Transitions)
             {
-                if(t.From.Length == 0)
+                var state = t.From;
+                if (!TransitionMap.ContainsKey(state))
                 {
-                    GenericTransitions.Add(t);
-                    continue;
+                    TransitionMap[state] = new List<FSMTransition>();
                 }
-
-                foreach (var state in t.From)
-                {
-                    if (!TransitionMap.ContainsKey(state))
-                    {
-                        TransitionMap[state] = new List<FSMTransition>();
-                    }
-                    TransitionMap[state].Add(t);
-                }
+                TransitionMap[state].Add(t);
             }
 
             foreach (var v in Variables.Keys)
@@ -70,7 +48,7 @@ namespace Assets._1._Scripts
                 });
             }
 
-            CurrentState = StateMap[BaseState];
+            CurrentState = BaseState;
         }
 
         public void Update()
@@ -80,9 +58,9 @@ namespace Assets._1._Scripts
 
         private void CheckTransition(Dictionary<string, object> variables)
         {
-            if (TransitionMap.ContainsKey(CurrentState.UniqueName))
+            if (TransitionMap.ContainsKey(CurrentState))
             {
-                var list = TransitionMap[CurrentState.UniqueName];
+                var list = TransitionMap[CurrentState];
                 foreach (var trans in list)
                 {
                     if (trans.CheckTransition(variables))
@@ -92,20 +70,11 @@ namespace Assets._1._Scripts
                     }
                 }
             }
-
-            foreach (var trans in GenericTransitions)
-            {
-                if (trans.CheckTransition(variables))
-                {
-                    PerformTransition(trans);
-                    return;
-                }
-            }
         }
 
         private void PerformTransition(FSMTransition transition)
         {
-            CurrentState = StateMap[transition.To];
+            CurrentState = transition.To;
         }
     }
 }
