@@ -3,12 +3,16 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Unity.Hierarchy;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEditorInternal.VR;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UISystemProfilerApi;
 
 public class FSMManagerWindow : EditorWindow
 {
@@ -38,18 +42,85 @@ public class FSMManagerWindow : EditorWindow
         window.Show();
     }
 
+    GameObject gameObject;
+    AnimationClip clip;
+    Editor gameObjectEditor;
+    float time = 0.0f;
+    PreviewRenderUtility previewRenderUtility;
+    GameObject previewObject;
+
     private void CreateGUI()
     {
-        //UI »ý¼º
+        //UI ï¿½ï¿½ï¿½ï¿½
         VisualTreeAsset.CloneTree(rootVisualElement);
 
+        var preview = rootVisualElement.Q<IMGUIContainer>("Preview");
+        preview.onGUIHandler = () =>
+        {
+            gameObject = (GameObject)EditorGUILayout.ObjectField(gameObject, typeof(GameObject), true);
+            clip = (AnimationClip)EditorGUILayout.ObjectField(clip, typeof(AnimationClip), true);
+            time = EditorGUILayout.FloatField(time);
 
-        //FSM ¼±ÅÃ ÀÌº¥Æ® µî·Ï
+            GUIStyle bgColor = new GUIStyle();
+            bgColor.normal.background = EditorGUIUtility.whiteTexture;
+
+            if (gameObject != null && clip != null)
+            {
+                if (gameObjectEditor == null)
+                {
+                    gameObjectEditor = Editor.CreateEditor(gameObject);
+                    previewRenderUtility = new PreviewRenderUtility(true, true);
+                    previewRenderUtility.cameraFieldOfView = 30f;
+                    previewRenderUtility.camera.nearClipPlane = 0.3f;
+                    previewRenderUtility.camera.farClipPlane = 1000; 
+                    previewObject = Instantiate(gameObject);
+                    previewObject.hideFlags = HideFlags.HideAndDontSave;
+                    previewRenderUtility.AddSingleGO(previewObject);
+                }
+                if (gameObjectEditor.target != gameObject)
+                {
+                    previewRenderUtility.Cleanup();
+                    DestroyImmediate(gameObjectEditor);
+                    gameObjectEditor = Editor.CreateEditor(gameObject);
+                    previewRenderUtility = new PreviewRenderUtility(true, true);
+                    previewRenderUtility.cameraFieldOfView = 30f;
+                    previewRenderUtility.camera.nearClipPlane = 0.3f;
+                    previewRenderUtility.camera.farClipPlane = 1000;
+                }
+                Debug.Log("run");
+                //time += Time.deltaTime;
+                //if (time > clip.length) time = 0.0f;
+                //AnimationMode.StartAnimationMode();
+                //AnimationMode.BeginSampling();
+                //AnimationMode.SampleAnimationClip(gameObject, clip, time);
+                //AnimationMode.EndSampling();
+                //gameObjectEditor.DrawPreview(GUILayoutUtility.GetRect(256, 256));
+                //AnimationMode.StopAnimationMode();
+                Rect r = GUILayoutUtility.GetRect(256, 256);
+                previewRenderUtility.BeginPreview(GUILayoutUtility.GetRect(256, 256), bgColor);
+
+                var previewCamera = previewRenderUtility.camera;
+
+                previewCamera.transform.position =
+                    gameObject.transform.position + new Vector3(0, 2.5f, -5);
+
+                previewCamera.transform.LookAt(gameObject.transform);
+
+                previewCamera.Render();
+
+                previewRenderUtility.EndAndDrawPreview(r);
+            }
+            //gameObjectEditor.ReloadPreviewInstances();
+            //gameObjectEditor.OnPreviewGUI(GUILayoutUtility.GetRect(256, 256), bgColor);
+            //gameObjectEditor.OnInteractivePreviewGUI(GUILayoutUtility.GetRect(256, 256), bgColor);
+        };
+
+        //FSM ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         var targetFSMSelector = rootVisualElement.Q<ObjectField>("FSM");
         targetFSMSelector.RegisterValueChangedCallback(OnTargetFSMChange);
 
 
-        //State ¼±ÅÃ ÀÌº¥Æ® µî·Ï
+        //State ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         stateList = rootVisualElement.Q<ListView>("StateList");
         stateList.selectionChanged += OnSelectState;
         stateList.bindItem = (e, i) =>
@@ -58,7 +129,7 @@ public class FSMManagerWindow : EditorWindow
         };
         stateList.makeItem = () => stateList.itemTemplate.Instantiate();
 
-        //State Ãß°¡&Á¦°Å ÀÌº¥Æ® µî·Ï
+        //State ï¿½ß°ï¿½&ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         var addState = rootVisualElement.Q<Button>("Add");
         addState.clicked += AddState;
         var removeState = rootVisualElement.Q<Button>("Remove");
@@ -67,7 +138,7 @@ public class FSMManagerWindow : EditorWindow
         uniqueNameField.RegisterValueChangedCallback(OnUniqueNameFieldChange);
 
 
-        //Transition ¼±ÅÃ ÀÌº¥Æ® µî·Ï
+        //Transition ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         inTransitionList = rootVisualElement.Q<ListView>("InTransitionList");
         outTransitionList = rootVisualElement.Q<ListView>("OutTransitionList");
         inTransitionList.selectionChanged += (list) => OnSelectTransition(list, isInTrans: true);
@@ -87,7 +158,7 @@ public class FSMManagerWindow : EditorWindow
         };
         inTransitionList.makeItem = outTransitionList.itemTemplate.Instantiate;
 
-        //Transition Ãß°¡&Á¦°Å ÀÌº¥Æ® µî·Ï
+        //Transition ï¿½ß°ï¿½&ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         var addInTransBtn = rootVisualElement.Q<Button>("AddInTrans");
         addInTransBtn.clicked += () => AddTransition(isInTrans: true);
         var removeInTransBtn = rootVisualElement.Q<Button>("RemoveInTrans");
@@ -97,19 +168,19 @@ public class FSMManagerWindow : EditorWindow
         var removeOutTransBtn = rootVisualElement.Q<Button>("RemoveOutTrans");
         removeOutTransBtn.clicked += RemoveTransition;
 
-        //VariableList Ã£±â
+        //VariableList Ã£ï¿½ï¿½
         varList = rootVisualElement.Q<ListView>("VariableList");
         varList.selectionChanged += OnSelectVar;
         varList.bindItem = BindVar;
         varList.makeItem = varList.itemTemplate.Instantiate;
 
-        //Variable Ãß°¡&Á¦°Å ÀÌº¥Æ® µî·Ï
+        //Variable ï¿½ß°ï¿½&ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         var addVarBtn = rootVisualElement.Q<Button>("AddVar");
         addVarBtn.clicked += AddVar;
         var removeVarBtn = rootVisualElement.Q<Button>("RemoveVar");
         removeVarBtn.clicked += RemoveVar;
 
-        //ÅÜ ¼±ÅÃ ÀÌº¥Æ® µî·Ï
+        //ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½
         var fsmTab = rootVisualElement.Q<VisualElement>("FSMTabButton");
         fsmTab.RegisterCallback<ClickEvent>((e) => SetTab("FSM"));
         fsmTab.style.opacity = 0.5f;
@@ -131,7 +202,7 @@ public class FSMManagerWindow : EditorWindow
         rootVisualElement.Q<VisualElement>("TransitionTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
         rootVisualElement.Q<VisualElement>("VariablesTab").style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
 
-        //ÃÊ±âÈ­
+        //ï¿½Ê±ï¿½È­
         SetTab("FSM");
         SetCurFSM(null);
 
@@ -252,7 +323,7 @@ public class FSMManagerWindow : EditorWindow
     }
 
 
-    //StateÀÇ ÀÌ¸§À» º¯°æÇßÀ»¶§
+    //Stateï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     private void OnUniqueNameFieldChange(ChangeEvent<string> evt)
     {
         var transitionbaselable = rootVisualElement.Q<Label>("CurStateName");

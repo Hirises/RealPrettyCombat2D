@@ -15,4 +15,10 @@ MonoBehaviour:
   From: {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
   To: {fileID: 11400000, guid: 12a01f5c471212a46bd358d460426191, type: 2}
   priority: 0
-  Conditions: []
+  Conditions:
+  - Type: 0
+    UniqueId: NormalAttack
+    BoolCondition_Ture: 0
+    NumericCondition_EquationType: 0
+    IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0
