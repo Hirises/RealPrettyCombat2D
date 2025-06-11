@@ -22,3 +22,5 @@ MonoBehaviour:
     NumericCondition_EquationType: 0
     IntCondition_Threshold: 0
     FloatCondition_Threshold: 0
+  TransitionTiming: 0
+  CustomCancleFrames: []

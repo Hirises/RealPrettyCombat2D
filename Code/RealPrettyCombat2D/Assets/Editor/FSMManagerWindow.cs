@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.Rendering.VolumeComponent;
 
 public class FSMManagerWindow : EditorWindow
 {
@@ -53,7 +54,8 @@ public class FSMManagerWindow : EditorWindow
         stateList.selectionChanged += OnSelectState;
         stateList.bindItem = (e, i) =>
         {
-            e.Q<Label>().text = $"{(stateList.itemsSource[i] as FSMState).UniqueName}";
+            var s = (stateList.itemsSource[i] as FSMState);
+            e.Q<Label>().text = $"{s.ModifiedName}";
         };
         stateList.makeItem = () => stateList.itemTemplate.Instantiate();
 
@@ -75,14 +77,14 @@ public class FSMManagerWindow : EditorWindow
         {
             var item = inTransitionList.itemsSource[i] as FSMTransition;
             if (item.From.Equals(curState)) e.Q<Label>().text = $"From Self";
-            else e.Q<Label>().text = $"From {item.From.UniqueName}";
+            else e.Q<Label>().text = $"From {item.From.ModifiedName}";
         };
         inTransitionList.makeItem = inTransitionList.itemTemplate.Instantiate;
         outTransitionList.bindItem = (e, i) =>
         {
             var item = outTransitionList.itemsSource[i] as FSMTransition;
             if (item.To.Equals(curState)) e.Q<Label>().text = $"To Self";
-            else e.Q<Label>().text = $"To {item.To.UniqueName}";
+            else e.Q<Label>().text = $"To {item.To.ModifiedName}";
         };
         inTransitionList.makeItem = outTransitionList.itemTemplate.Instantiate;
 
@@ -244,7 +246,16 @@ public class FSMManagerWindow : EditorWindow
         {
             AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(curState), $"{curState.UniqueName}_____{System.Guid.NewGuid()}");
         });
-        transitionbaselable.text = curState.UniqueName;
+        stateTab.Q<Toggle>().RegisterValueChangedCallback((e) =>
+        {
+            var transitionbaselable = rootVisualElement.Q<Label>("CurStateName");
+            if (curState.MarkAsBlendingState) transitionbaselable.text = $"({curState.UniqueName})";
+            else transitionbaselable.text = $"{curState.UniqueName}";
+
+            var stateList = rootVisualElement.Q<ListView>("StateList");
+            stateList.Rebuild();
+        });
+        transitionbaselable.text = $"{curState.ModifiedName}";
         SetCurTranstition(null);
         UpdateTransitionList();
         if (!curTab.name.StartsWith("State") && !curTab.name.StartsWith("Transition")) SetTab("State");
@@ -255,7 +266,7 @@ public class FSMManagerWindow : EditorWindow
     private void OnUniqueNameFieldChange(ChangeEvent<string> evt)
     {
         var transitionbaselable = rootVisualElement.Q<Label>("CurStateName");
-        transitionbaselable.text = evt.newValue;
+        transitionbaselable.text = curState.MarkAsBlendingState ? $"({evt.newValue})" : $"{evt.newValue}";
 
         var stateList = rootVisualElement.Q<ListView>("StateList");
         stateList.Rebuild();
@@ -314,6 +325,7 @@ public class FSMManagerWindow : EditorWindow
         AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(curTransition));
         UpdateTransitionList();
         inTransitionList.ClearSelection();
+        SetCurTranstition(null);
     }
 
     private void UpdateTransitionList()
@@ -333,40 +345,52 @@ public class FSMManagerWindow : EditorWindow
                 inT.Add(t);
             }
         }
+        inT = inT.OrderByDescending(t => t.priority).ToList();
+        outT = outT.OrderByDescending(t => t.priority).ToList();
 
         inTransitionList.itemsSource = inT;
         outTransitionList.itemsSource = outT;
+
+        if(inTransitionList.selectedItem != null)
+        {
+            inTransitionList.SetSelectionWithoutNotify(new int[] { inTransitionList.itemsSource.IndexOf(curTransition) });
+        }
+        else if (outTransitionList.selectedItem != null)
+        {
+            outTransitionList.SetSelectionWithoutNotify(new int[] { outTransitionList.itemsSource.IndexOf(curTransition) });
+        }
     }
 
     private void SetCurTranstition(FSMTransition transtition)
     {
         curTransition = transtition;
         var inspector = rootVisualElement.Q<VisualElement>("TransitionInfo");
-        inspector.Clear();
         if (curTransition == null)
         {
+            inspector.style.visibility = new StyleEnum<Visibility>(Visibility.Hidden);
             return;
         }
+        inspector.style.visibility = new StyleEnum<Visibility>(Visibility.Visible);
 
         var obj = new SerializedObject(curTransition);
-        InspectorElement.FillDefaultInspector(inspector, obj, null);
+        inspector.Bind(obj);
         bool IsSelfTrans = transtition.To.Equals(transtition.From);
         bool IsOutTrans = transtition.From.Equals(curState);
-        SetPropertyFieldBindings(inspector, obj, IsSelfTrans ? "" : (IsOutTrans ? "From" : "To"));
-    }
+        bool showFrom = IsSelfTrans || !IsOutTrans;
+        bool showTo = IsSelfTrans || IsOutTrans;
+        inspector.Q<ObjectField>("From").style.display = new StyleEnum<DisplayStyle>(showFrom ? DisplayStyle.Flex : DisplayStyle.None);
+        inspector.Q<ObjectField>("From").RegisterValueChangedCallback((e) => UpdateTransitionList());
+        inspector.Q<ObjectField>("To").style.display = new StyleEnum<DisplayStyle>(showTo ? DisplayStyle.Flex : DisplayStyle.None);
+        inspector.Q<ObjectField>("To").RegisterValueChangedCallback((e) => UpdateTransitionList());
+        inspector.Q<IntegerField>("Priority").RegisterValueChangedCallback((e) => UpdateTransitionList());
+        inspector.Q<EnumField>("TransitionTiming").style.display = new StyleEnum<DisplayStyle>(transtition.From.MarkAsBlendingState ? DisplayStyle.None : DisplayStyle.Flex);
+        inspector.Q<EnumField>("TransitionTiming").RegisterValueChangedCallback((e) => {
+            inspector.Q<VisualElement>("CustomCancleFrames").style.display = new StyleEnum<DisplayStyle>(
+                curTransition.TransitionTiming == FSMTransition.FSMTransitionTiming.Custom ? DisplayStyle.Flex : DisplayStyle.None);
+        });
+        inspector.Q<VisualElement>("CustomCancleFrames").style.display = new StyleEnum<DisplayStyle>(
+            curTransition.TransitionTiming == FSMTransition.FSMTransitionTiming.Custom ? DisplayStyle.Flex : DisplayStyle.None);
 
-    private void SetPropertyFieldBindings(VisualElement container, SerializedObject serializedObject, string omitField)
-    {
-        var propertyFields = container.Query<PropertyField>().ToList();
-        foreach (var propertyField in propertyFields)
-        {
-            propertyField.Bind(serializedObject);
-            propertyField.RegisterValueChangeCallback((e) => UpdateTransitionList());
-            if (propertyField.name.Equals($"PropertyField:{omitField}") || propertyField.name.Equals($"PropertyField:Script"))
-            {
-                propertyField.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
-            }
-        }
     }
     #endregion
 

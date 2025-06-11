@@ -24,6 +24,7 @@ public class FSMRunner : MonoBehaviour
         FSM.Update();
     }
 
+    #region Getter & Setter
     public void SetBool(string name, bool value)
     {
         FSM.SetVariable(name, value);
@@ -43,4 +44,30 @@ public class FSMRunner : MonoBehaviour
     {
         FSM.SetVariable(name, true);
     }
+
+    public int GetInt(string name)
+    {
+        return FSM.GetVariable<int>(name);
+    }
+
+    public float GetFloat(string name)
+    {
+        return FSM.GetVariable<float>(name);
+    }
+
+    public bool GetBool(string name)
+    {
+        return FSM.GetVariable<bool>(name);
+    } 
+
+    public void AddTriggerEvent(string name, System.Action action)
+    {
+        FSM.AddTriggerEvent(name, action);
+    }
+
+    public void RemoveTriggerEvent(string name, System.Action action)
+    {
+        FSM.RemoveTriggerEvent(name, action);
+    }
+    #endregion
 }

@@ -10,17 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b39990bb1392e984cacf978a1a11123f, type: 3}
-  m_Name: 237df4f5-be46-42b2-8fc4-56374cc7051c
+  m_Name: 365ff227-6c2b-447e-a997-bdb14b482fbb
   m_EditorClassIdentifier: 
-  From: {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
-  To: {fileID: 11400000, guid: 12a01f5c471212a46bd358d460426191, type: 2}
-  priority: 0
+  From: {fileID: 11400000, guid: 57c6cc508d7f7824bb0166800addb7e3, type: 2}
+  To: {fileID: 11400000, guid: 57c6cc508d7f7824bb0166800addb7e3, type: 2}
+  priority: 5
   Conditions:
   - Type: 0
-    UniqueId: NormalAttack
+    UniqueId: Jump
     BoolCondition_Ture: 0
     NumericCondition_EquationType: 0
     IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0
+  - Type: 2
+    UniqueId: JumpCount
+    BoolCondition_Ture: 0
+    NumericCondition_EquationType: 3
+    IntCondition_Threshold: 1
     FloatCondition_Threshold: 0
   TransitionTiming: 0
   CustomCancleFrames: []

@@ -36,6 +36,8 @@
                         <ui:VisualElement style="flex-grow: 0; flex-shrink: 0; height: 35px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-left-color: rgba(0, 0, 0, 0.36); border-right-color: rgba(0, 0, 0, 0.36); border-top-color: rgba(0, 0, 0, 0.36); border-bottom-color: rgba(0, 0, 0, 0.36); background-color: rgba(0, 0, 0, 0.11);">
                             <ui:Label text="이름은 상태들 간에 중복되지 않는 고유한 값이여야하며, Animator를 통해 재생할 애니메이션의 이름과 동일해야합니다." style="width: 100%; height: 100%; -unity-text-align: middle-left; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; color: rgb(196, 196, 196);" />
                         </ui:VisualElement>
+                        <ui:Toggle label="IsBlendingState" binding-path="MarkAsBlendingState" />
+                        <uie:PropertyField binding-path="Events" />
                         <ui:IMGUIContainer name="Preview" style="flex-grow: 1;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="TransitionTab" enabled="true" style="flex-grow: 1; flex-shrink: 0.3; flex-basis: auto; background-color: rgba(107, 136, 119, 0.3); width: 100%; display: none; flex-direction: row;">
@@ -62,7 +64,14 @@
                                 <ui:ListView name="OutTransitionList" fixed-item-height="40" virtualization-method="DynamicHeight" item-template="project://database/Assets/FSMMamangerWindow_TransitionItem.uxml?fileID=9197481963319205126&amp;guid=00f7d12bbf6350e489016744245b13fa&amp;type=3#FSMMamangerWindow_TransitionItem" style="height: 100%; width: 100%; background-color: rgba(0, 0, 0, 0.12); padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="TransitionInfo" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;" />
+                        <ui:VisualElement name="TransitionInfo" style="flex-grow: 1; width: 50%; background-color: rgb(56, 56, 56); padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                            <uie:ObjectField label="From" binding-path="From" type="Assets._1._Scripts.FSMState, Assembly-CSharp" name="From" />
+                            <uie:ObjectField label="To" binding-path="To" type="Assets._1._Scripts.FSMState, Assembly-CSharp" name="To" />
+                            <ui:IntegerField label="Priority" value="0" binding-path="priority" name="Priority" />
+                            <uie:PropertyField binding-path="Conditions" name="Conditions" />
+                            <ui:EnumField label="TransitionTiming" value="Center" type="Assets._1._Scripts.FSMTransition+FSMTransitionTiming, Assembly-CSharp" binding-path="TransitionTiming" name="TransitionTiming" />
+                            <uie:PropertyField binding-path="CustomCancleFrames" name="CustomCancleFrames" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="VariablesTab" enabled="true" style="flex-grow: 1; flex-shrink: 0.3; flex-basis: auto; background-color: rgba(164, 112, 154, 0.3); width: 100%; display: none; flex-direction: row;">
                         <ui:VisualElement style="flex-grow: 1; width: 50%;">

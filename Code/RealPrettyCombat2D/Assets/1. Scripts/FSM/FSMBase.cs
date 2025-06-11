@@ -1,9 +1,11 @@
 ﻿using NaughtyAttributes;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using RotaryHeart.Lib.SerializableDictionary;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.Animations;
+using UnityEngine;
 
 namespace Assets._1._Scripts
 {
@@ -22,8 +24,10 @@ namespace Assets._1._Scripts
         private Dictionary<FSMState, List<FSMTransition>> TransitionMap;
         private Dictionary<string, object> VariableMap = new Dictionary<string, object>();
         private Animator Anim;
+        private Dictionary<string, List<Action>> TriggerEventMap = new Dictionary<string, List<Action>>();
 
         private FSMState CurrentState;
+        private List<FSMTransition> Cancelable;
 
         #region class VarItem
         [Serializable]
@@ -45,7 +49,7 @@ namespace Assets._1._Scripts
             [AllowNesting]
             [SerializeField]
             public bool Base_Bool;
-        } 
+        }
         #endregion
 
 
@@ -54,7 +58,7 @@ namespace Assets._1._Scripts
             this.Anim = anim;
 
             TransitionMap = new Dictionary<FSMState, List<FSMTransition>>();
-            foreach(var t in Transitions)
+            foreach (var t in Transitions)
             {
                 var state = t.From;
                 if (!TransitionMap.ContainsKey(state))
@@ -66,50 +70,141 @@ namespace Assets._1._Scripts
 
             foreach (var v in Variables)
             {
-                VariableMap.Add(v.Name, v.Type switch { 
+                VariableMap.Add(v.Name, v.Type switch
+                {
                     FSMCondition.FSMConditionVariableType.Bool => v.Base_Bool,
                     FSMCondition.FSMConditionVariableType.Int => v.Base_Int,
                     FSMCondition.FSMConditionVariableType.Float => v.Base_Float,
-                    FSMCondition.FSMConditionVariableType.Trigger => true,
+                    FSMCondition.FSMConditionVariableType.Trigger => false,
                     _ => null
                 });
             }
 
             CurrentState = BaseState;
+            CurrentState.TriggerOnEnter(VariableMap, this);
         }
 
         public void Update()
         {
+            CurrentState.TriggerEvent(GetCurrentFrame(), VariableMap, this);
             CheckTransition(VariableMap);
+            foreach (var variable in Variables)
+            {
+                if (variable.Type == FSMCondition.FSMConditionVariableType.Trigger && VariableMap.ContainsKey(variable.Name) && (bool)VariableMap[variable.Name])
+                {
+                    // Reset trigger variable after use
+                    VariableMap[variable.Name] = false;
+                }
+            }
+        }
+
+        private int GetTotalFrames()
+        {
+            if (Anim == null) return 0;
+            var stateInfo = Anim.GetCurrentAnimatorClipInfo(0)[0];
+            return Mathf.FloorToInt(stateInfo.clip.length * stateInfo.clip.frameRate);
+        }
+
+        private int GetCurrentFrame()
+        {
+            if (Anim == null) return 0;
+            var stateInfo = Anim.GetCurrentAnimatorClipInfo(0)[0];
+            float normalTime = Anim.GetCurrentAnimatorStateInfo(0).normalizedTime % 1f; // Get the normalized time (0 to 1)
+            return Mathf.FloorToInt(normalTime * stateInfo.clip.length * stateInfo.clip.frameRate);
         }
 
         private void CheckTransition(Dictionary<string, object> variables)
         {
+            FSMTransition availableTrans = null;
+            int currentFrame = GetCurrentFrame();
+            int totalFrames = GetTotalFrames();
             if (TransitionMap.ContainsKey(CurrentState))
             {
                 var list = TransitionMap[CurrentState];
                 foreach (var trans in list)
                 {
-                    if (trans.CheckTransition(variables))
+                    if (trans.From.MarkAsBlendingState && trans.CheckTransition(variables)) //블렌딩 스테이트라면, 타이밍 체크를 생략
                     {
-                        PerformTransition(trans);
-                        return;
+                        if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
+                    }
+                    else if (trans.CheckTransitionTiming(currentFrame, totalFrames) && trans.CheckTransition(variables))
+                    {
+                        if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
                     }
                 }
+                if (availableTrans != null) PerformTransition(availableTrans);
             }
         }
 
         private void PerformTransition(FSMTransition transition)
         {
+            Debug.Log($"Change State From {CurrentState.UniqueName} To {transition.To.UniqueName}");
+            CurrentState.TriggerOnExit(VariableMap, this);
             CurrentState = transition.To;
-            Debug.Log($"Change State To {CurrentState.UniqueName}");
+            CurrentState.TriggerOnEnter(VariableMap, this);
+
+            if (CurrentState.MarkAsBlendingState)
+            {
+                //블렌딩 스테이트라면 -> 즉시 트렌지션 체크
+                CheckTransition(VariableMap);
+                return;
+            }
 
             Anim.Play(CurrentState.UniqueName);
         }
 
+        #region Getter & Setter
+        public void AddTriggerEvent(string triggerName, Action action)
+        {
+            if (Variables.Find(v => v.Name == triggerName && v.Type == FSMCondition.FSMConditionVariableType.Trigger) == null)
+            {
+                Debug.LogWarning($"Trigger {triggerName} does not exist in FSMBase.");
+                return;
+            }
+            if (!TriggerEventMap.ContainsKey(triggerName))
+            {
+                TriggerEventMap[triggerName] = new List<Action>();
+            }
+            TriggerEventMap[triggerName].Add(action);
+        }
+
+        public void RemoveTriggerEvent(string triggerName, Action action)
+        {
+            if (!TriggerEventMap.ContainsKey(triggerName))
+            {
+                Debug.LogWarning($"Trigger {triggerName} does not exist in FSMBase.");
+                return;
+            }
+            TriggerEventMap[triggerName].Remove(action);
+        }
+
         public void SetVariable(string name, object value)
         {
+            if (!VariableMap.ContainsKey(name))
+            {
+                Debug.LogWarning($"Variable {name} does not exist in FSMBase. Creating a new one.");
+                return;
+            }
             VariableMap[name] = value;
+
+            if (value is bool && TriggerEventMap.ContainsKey(name) && TriggerEventMap[name].Count > 0 && (bool)value)
+            {
+                foreach (var action in TriggerEventMap[name])
+                {
+                    action.Invoke();
+                }
+            }
         }
+
+        public T GetVariable<T>(string name)
+        {
+            if (!VariableMap.ContainsKey(name))
+            {
+                Debug.LogWarning($"Variable {name} does not exist in FSMBase.");
+                return default;
+            }
+            return (T)VariableMap[name];
+        } 
+        #endregion
     }
 }

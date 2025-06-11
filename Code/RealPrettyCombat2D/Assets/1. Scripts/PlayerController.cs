@@ -36,16 +36,24 @@ public class PlayerController : MonoBehaviour
     {
         moveAction = InputSystem.actions.FindAction("Move");
         sprintAction = InputSystem.actions.FindAction("Sprint");
+    }
+
+    private void Start()
+    {
         SetGrounded(true);
+        FSM.AddTriggerEvent("RunJump", OnJumpTrigged);
     }
 
     void Update()
     {
         float speed = sprintAction.IsPressed() ? sprintspeed : movespeed;
-        float velX = rigidbody.linearVelocityX = moveAction.ReadValue<float>() * speed;
-        animator.SetBool("IsMove", velX != 0);
+        float velX = moveAction.ReadValue<float>() * speed;
+        if(FSM.GetBool("ApplyMovement")) rigidbody.linearVelocityX = velX;
+        else rigidbody.linearVelocityX = 0;
+        //animator.SetBool("IsMove", velX != 0);
         FSM.SetBool("IsMove", velX != 0);
-        animator.SetBool("IsSprint", sprintAction.IsPressed());
+        FSM.SetBool("IsSprint", sprintAction.IsPressed());
+        //animator.SetBool("IsSprint", sprintAction.IsPressed());
         if (velX < 0) transform.localScale = new Vector3(-1 , 1, 1);
         if (velX > 0) transform.localScale = new Vector3(1, 1, 1);
     }
@@ -63,7 +71,8 @@ public class PlayerController : MonoBehaviour
     private void SetGrounded(bool value)
     {
         this.isGrounded = value;
-        animator.SetBool("IsGround", isGrounded);
+        //animator.SetBool("IsGround", isGrounded);
+        FSM.SetBool("IsGround", isGrounded);
         if (this.isGrounded)
         {
             jumpCount = maxJumpCount;
@@ -75,12 +84,29 @@ public class PlayerController : MonoBehaviour
         if(context.phase == InputActionPhase.Performed)
         {
             //Button Down
-            animator.SetTrigger("NormalAttack");
+            //animator.SetTrigger("NormalAttack");
+            FSM.SetTrigger("NormalAttack");
         }
         else if(context.phase == InputActionPhase.Canceled)
         {
             //Button Up
         }
+    }
+
+    public void OnJumpTrigged()
+    {
+        Debug.Log("Jump Triggered");
+        SetGrounded(false);
+        rigidbody.linearVelocityY = jumpforce;
+
+        if (jumpCount < maxJumpCount)  //더블점프 파티클
+        {
+            var particle = Instantiate(doubleJumpParticle);
+            particle.transform.position = transform.position;
+            particle.Play();
+        }
+
+        jumpCount--;
     }
 
     public void OnJump(CallbackContext context)
@@ -90,18 +116,8 @@ public class PlayerController : MonoBehaviour
             //Button Down
             if (jumpCount <= 0) return;
 
-            SetGrounded(false);
-            rigidbody.linearVelocityY = jumpforce;
-            animator.SetTrigger("Jump");
-
-            if (jumpCount < maxJumpCount)  //더블점프 파티클
-            {
-                var particle = Instantiate(doubleJumpParticle);
-                particle.transform.position = transform.position;
-                particle.Play();
-            }
-
-            jumpCount--;
+            FSM.SetTrigger("Jump");
+            //animator.SetTrigger("Jump");
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
