@@ -10,19 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b39990bb1392e984cacf978a1a11123f, type: 3}
-  m_Name: 82933277-8f16-47ff-9a24-11507156ec30
+  m_Name: d0afb5fd-1be9-4144-9e0f-5caeb5df68f7
   m_EditorClassIdentifier: 
-  From: {fileID: 11400000, guid: 829fa1b16f1a43147bec0d338046e45e, type: 2}
-  To: {fileID: 11400000, guid: ddf65994d887a5741af0bfad4d49f98d, type: 2}
+  From: {fileID: 11400000, guid: 22b59118f6f719149952d0d9d530dc77, type: 2}
+  To: {fileID: 11400000, guid: 860223cc385f48a439bea357f521bda8, type: 2}
   priority: 0
-  Conditions:
-  - Type: 0
-    UniqueId: NormalAttack
-    BoolCondition_Ture: 0
-    NumericCondition_EquationType: 0
-    IntCondition_Threshold: 0
-    FloatCondition_Threshold: 0
-  TransitionTiming: 0
+  Conditions: []
+  TransitionTiming: 1
   CustomCancleFrames: []
   UseInputBuffer: 0
   CustomInputBufferFrames: []

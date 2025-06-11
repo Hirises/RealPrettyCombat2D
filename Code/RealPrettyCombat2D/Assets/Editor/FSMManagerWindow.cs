@@ -374,6 +374,7 @@ public class FSMManagerWindow : EditorWindow
 
         var obj = new SerializedObject(curTransition);
         inspector.Bind(obj);
+        
         bool IsSelfTrans = transtition.To.Equals(transtition.From);
         bool IsOutTrans = transtition.From.Equals(curState);
         bool showFrom = IsSelfTrans || !IsOutTrans;
@@ -382,7 +383,9 @@ public class FSMManagerWindow : EditorWindow
         inspector.Q<ObjectField>("From").RegisterValueChangedCallback((e) => UpdateTransitionList());
         inspector.Q<ObjectField>("To").style.display = new StyleEnum<DisplayStyle>(showTo ? DisplayStyle.Flex : DisplayStyle.None);
         inspector.Q<ObjectField>("To").RegisterValueChangedCallback((e) => UpdateTransitionList());
+        
         inspector.Q<IntegerField>("Priority").RegisterValueChangedCallback((e) => UpdateTransitionList());
+        
         inspector.Q<EnumField>("TransitionTiming").style.display = new StyleEnum<DisplayStyle>(transtition.From.MarkAsBlendingState ? DisplayStyle.None : DisplayStyle.Flex);
         inspector.Q<EnumField>("TransitionTiming").RegisterValueChangedCallback((e) => {
             inspector.Q<VisualElement>("CustomCancleFrames").style.display = new StyleEnum<DisplayStyle>(
@@ -390,6 +393,14 @@ public class FSMManagerWindow : EditorWindow
         });
         inspector.Q<VisualElement>("CustomCancleFrames").style.display = new StyleEnum<DisplayStyle>(
             curTransition.TransitionTiming == FSMTransition.FSMTransitionTiming.Custom ? DisplayStyle.Flex : DisplayStyle.None);
+
+        inspector.Q<Toggle>("UseInputBuffer").style.display = new StyleEnum<DisplayStyle>(transtition.From.MarkAsBlendingState ? DisplayStyle.None : DisplayStyle.Flex);
+        inspector.Q<Toggle>("UseInputBuffer").RegisterValueChangedCallback((e) => {
+            inspector.Q<VisualElement>("CustomInputBufferFrames").style.display = new StyleEnum<DisplayStyle>(
+                e.newValue ? DisplayStyle.Flex : DisplayStyle.None);
+        });
+        inspector.Q<VisualElement>("CustomInputBufferFrames").style.display = new StyleEnum<DisplayStyle>(
+            curTransition.UseInputBuffer ? DisplayStyle.Flex : DisplayStyle.None);
 
     }
     #endregion

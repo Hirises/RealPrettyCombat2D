@@ -22,6 +22,12 @@ namespace Assets._1._Scripts
         [SerializeField]
         [ShowIf(nameof(TransitionTiming), FSMTransitionTiming.Custom)]
         public List<Vector2Int> CustomCancleFrames = new List<Vector2Int>();
+        [SerializeField]
+        public bool UseInputBuffer = false;
+        [SerializeField]
+        [ShowIf(nameof(UseInputBuffer))]
+        [AllowNesting]
+        public List<Vector2Int> CustomInputBufferFrames = new List<Vector2Int>();
 
         public enum FSMTransitionTiming
         {

@@ -22,11 +22,7 @@ MonoBehaviour:
     NumericCondition_EquationType: 0
     IntCondition_Threshold: 0
     FloatCondition_Threshold: 0
-  - Type: 2
-    UniqueId: JumpCount
-    BoolCondition_Ture: 0
-    NumericCondition_EquationType: 3
-    IntCondition_Threshold: 1
-    FloatCondition_Threshold: 0
   TransitionTiming: 0
   CustomCancleFrames: []
+  UseInputBuffer: 0
+  CustomInputBufferFrames: []

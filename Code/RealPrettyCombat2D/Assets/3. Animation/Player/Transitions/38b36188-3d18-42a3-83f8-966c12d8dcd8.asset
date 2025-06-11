@@ -13,8 +13,23 @@ MonoBehaviour:
   m_Name: 38b36188-3d18-42a3-83f8-966c12d8dcd8
   m_EditorClassIdentifier: 
   From: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
-  To: {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
-  priority: 0
-  Conditions: []
-  TransitionTiming: 0
-  CustomCancleFrames: []
+  To: {fileID: 11400000, guid: 3cba341071f5ef346bd74384f3e7f3bb, type: 2}
+  priority: 1
+  Conditions:
+  - Type: 1
+    UniqueId: IsMove
+    BoolCondition_Ture: 1
+    NumericCondition_EquationType: 0
+    IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0
+  - Type: 1
+    UniqueId: IsSprint
+    BoolCondition_Ture: 1
+    NumericCondition_EquationType: 0
+    IntCondition_Threshold: 0
+    FloatCondition_Threshold: 0
+  TransitionTiming: 2
+  CustomCancleFrames:
+  - {x: 15, y: 30}
+  UseInputBuffer: 0
+  CustomInputBufferFrames: []

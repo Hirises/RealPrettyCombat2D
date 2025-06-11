@@ -27,7 +27,10 @@ namespace Assets._1._Scripts
         private Dictionary<string, List<Action>> TriggerEventMap = new Dictionary<string, List<Action>>();
 
         private FSMState CurrentState;
-        private List<FSMTransition> Cancelable;
+        /// <summary>
+        /// 선입력된 트렌지션
+        /// </summary>
+        private HashSet<FSMTransition> QueuedTransition = new HashSet<FSMTransition>();
 
         #region class VarItem
         [Serializable]
@@ -81,6 +84,7 @@ namespace Assets._1._Scripts
             }
 
             CurrentState = BaseState;
+            QueuedTransition.Clear();
             CurrentState.TriggerOnEnter(VariableMap, this);
         }
 
@@ -118,22 +122,47 @@ namespace Assets._1._Scripts
             FSMTransition availableTrans = null;
             int currentFrame = GetCurrentFrame();
             int totalFrames = GetTotalFrames();
+
+            //선입력 검사
+            foreach (var trans in QueuedTransition)
+            {
+                if (trans.CheckTransitionTiming(currentFrame, totalFrames))
+                {
+                    //수행가능한 타이밍이면 -> 트렌지션 추가
+                    if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
+                }
+            }
+
+            //새로운 트렌지션 검사
             if (TransitionMap.ContainsKey(CurrentState))
             {
                 var list = TransitionMap[CurrentState];
                 foreach (var trans in list)
                 {
-                    if (trans.From.MarkAsBlendingState && trans.CheckTransition(variables)) //블렌딩 스테이트라면, 타이밍 체크를 생략
+                    if (trans.From.MarkAsBlendingState && trans.CheckTransition(variables)) //블렌딩 스테이트에서 나가는 트렌지션이라면, 타이밍 체크를 생략
                     {
                         if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
                     }
-                    else if (trans.CheckTransitionTiming(currentFrame, totalFrames) && trans.CheckTransition(variables))
+                    else if (trans.CheckTransition(variables))
                     {
-                        if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
+                        if(trans.CheckTransitionTiming(currentFrame, totalFrames))
+                        {
+                            //수행가능한 타이밍이면 -> 트렌지션 추가
+                            if (availableTrans == null || trans.priority > availableTrans.priority) availableTrans = trans;
+                        }
+                        else
+                        {
+                            //수행 불가능한 타이밍이면 -> 선입력 추가
+                            if (trans.UseInputBuffer) foreach (var frame in trans.CustomInputBufferFrames)
+                                    if (currentFrame >= frame.x && currentFrame <= frame.y) QueuedTransition.Add(trans);
+                        }
                     }
                 }
+
+                //결정된 트렌지션 수행
                 if (availableTrans != null) PerformTransition(availableTrans);
             }
+
         }
 
         private void PerformTransition(FSMTransition transition)
@@ -141,6 +170,7 @@ namespace Assets._1._Scripts
             Debug.Log($"Change State From {CurrentState.UniqueName} To {transition.To.UniqueName}");
             CurrentState.TriggerOnExit(VariableMap, this);
             CurrentState = transition.To;
+            QueuedTransition.Clear();
             CurrentState.TriggerOnEnter(VariableMap, this);
 
             if (CurrentState.MarkAsBlendingState)

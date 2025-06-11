@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     private float jumpforce;
     [SerializeField]
     private int maxJumpCount;
+    [SerializeField]
+    private float comboResetTime = 1f;
 
     private InputAction moveAction;
     private InputAction sprintAction;
@@ -42,6 +44,7 @@ public class PlayerController : MonoBehaviour
     {
         SetGrounded(true);
         FSM.AddTriggerEvent("RunJump", OnJumpTrigged);
+        FSM.AddTriggerEvent("ResetCombo", OnComboResetTrigged);
     }
 
     void Update()
@@ -91,6 +94,17 @@ public class PlayerController : MonoBehaviour
         {
             //Button Up
         }
+    }
+
+    public void OnComboResetTrigged()
+    {
+        CancelInvoke(nameof(ResetCombo));
+        Invoke(nameof(ResetCombo), comboResetTime);
+    }
+
+    private void ResetCombo()
+    {
+        FSM.SetInt("ComboCount", 0);
     }
 
     public void OnJumpTrigged()

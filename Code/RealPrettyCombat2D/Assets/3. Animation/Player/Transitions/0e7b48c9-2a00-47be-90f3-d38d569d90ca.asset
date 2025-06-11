@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b39990bb1392e984cacf978a1a11123f, type: 3}
-  m_Name: 6257057e-ba47-426d-9c6c-99e425250790
+  m_Name: 0e7b48c9-2a00-47be-90f3-d38d569d90ca
   m_EditorClassIdentifier: 
-  From: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
+  From: {fileID: 11400000, guid: 22b59118f6f719149952d0d9d530dc77, type: 2}
   To: {fileID: 11400000, guid: 57c6cc508d7f7824bb0166800addb7e3, type: 2}
   priority: 5
   Conditions:
@@ -22,8 +22,8 @@ MonoBehaviour:
     NumericCondition_EquationType: 0
     IntCondition_Threshold: 0
     FloatCondition_Threshold: 0
-  TransitionTiming: 2
-  CustomCancleFrames:
-  - {x: 0, y: 10}
-  UseInputBuffer: 0
-  CustomInputBufferFrames: []
+  TransitionTiming: 1
+  CustomCancleFrames: []
+  UseInputBuffer: 1
+  CustomInputBufferFrames:
+  - {x: 0, y: 999}

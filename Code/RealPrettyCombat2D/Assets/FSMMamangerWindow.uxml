@@ -33,10 +33,10 @@
                     </ui:VisualElement>
                     <ui:VisualElement name="StateTab" style="flex-grow: 0.7; flex-shrink: 1; flex-basis: auto; background-color: rgba(87, 85, 103, 0.37); width: 100%; height: 100%; overflow: visible; flex-direction: column; padding-top: 5px; display: flex; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                         <ui:TextField label="UniqueName" placeholder-text="DefaultState" data-source-path="UniqueName" binding-path="UniqueName" name="UniqueNameField" style="padding-bottom: 0; height: auto;" />
+                        <ui:Toggle label="IsBlendingState" binding-path="MarkAsBlendingState" />
                         <ui:VisualElement style="flex-grow: 0; flex-shrink: 0; height: 35px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-left-color: rgba(0, 0, 0, 0.36); border-right-color: rgba(0, 0, 0, 0.36); border-top-color: rgba(0, 0, 0, 0.36); border-bottom-color: rgba(0, 0, 0, 0.36); background-color: rgba(0, 0, 0, 0.11);">
                             <ui:Label text="이름은 상태들 간에 중복되지 않는 고유한 값이여야하며, Animator를 통해 재생할 애니메이션의 이름과 동일해야합니다." style="width: 100%; height: 100%; -unity-text-align: middle-left; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; color: rgb(196, 196, 196);" />
                         </ui:VisualElement>
-                        <ui:Toggle label="IsBlendingState" binding-path="MarkAsBlendingState" />
                         <uie:PropertyField binding-path="Events" />
                         <ui:IMGUIContainer name="Preview" style="flex-grow: 1;" />
                     </ui:VisualElement>
@@ -71,6 +71,8 @@
                             <uie:PropertyField binding-path="Conditions" name="Conditions" />
                             <ui:EnumField label="TransitionTiming" value="Center" type="Assets._1._Scripts.FSMTransition+FSMTransitionTiming, Assembly-CSharp" binding-path="TransitionTiming" name="TransitionTiming" />
                             <uie:PropertyField binding-path="CustomCancleFrames" name="CustomCancleFrames" />
+                            <ui:Toggle label="UseInputBuffer" binding-path="UseInputBuffer" name="UseInputBuffer" />
+                            <uie:PropertyField binding-path="CustomInputBufferFrames" label="InputBufferFrames" name="CustomInputBufferFrames" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="VariablesTab" enabled="true" style="flex-grow: 1; flex-shrink: 0.3; flex-basis: auto; background-color: rgba(164, 112, 154, 0.3); width: 100%; display: none; flex-direction: row;">

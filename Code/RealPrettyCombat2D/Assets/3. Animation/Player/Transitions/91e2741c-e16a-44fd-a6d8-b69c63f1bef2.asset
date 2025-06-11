@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: 91e2741c-e16a-44fd-a6d8-b69c63f1bef2
   m_EditorClassIdentifier: 
   From: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
-  To: {fileID: 11400000, guid: e79798345504ec04b9177b150a8d0273, type: 2}
+  To: {fileID: 11400000, guid: 860223cc385f48a439bea357f521bda8, type: 2}
   priority: 0
   Conditions: []
-  TransitionTiming: 0
-  CustomCancleFrames: []
+  TransitionTiming: 1
+  CustomCancleFrames:
+  - {x: 15, y: 30}
+  UseInputBuffer: 0
+  CustomInputBufferFrames: []

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 75936462-9568-460d-8f5d-c113389134f9
   m_EditorClassIdentifier: 
   From: {fileID: 11400000, guid: 3cba341071f5ef346bd74384f3e7f3bb, type: 2}
-  To: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
+  To: {fileID: 11400000, guid: ddf65994d887a5741af0bfad4d49f98d, type: 2}
   priority: 1
   Conditions:
   - Type: 0
@@ -24,3 +24,5 @@ MonoBehaviour:
     FloatCondition_Threshold: 0
   TransitionTiming: 0
   CustomCancleFrames: []
+  UseInputBuffer: 0
+  CustomInputBufferFrames: []

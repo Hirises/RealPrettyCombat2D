@@ -25,9 +25,9 @@ namespace Assets._1._Scripts
         public enum FSMConditionVariableEquation
         {
             LesserThen,
-            LessOrEqual,
+            LessOrEqualThen,
             Equal,
-            GreaterOrEqual,
+            GreatOrEqualThen,
             GreaterThen,
         }
 
@@ -67,30 +67,30 @@ namespace Assets._1._Scripts
                     switch (NumericCondition_EquationType)
                     {
                         case FSMConditionVariableEquation.LesserThen:
-                            return IntCondition_Threshold < (int)variables[UniqueId];
-                        case FSMConditionVariableEquation.LessOrEqual:
-                            return IntCondition_Threshold <= (int)variables[UniqueId];
+                            return IntCondition_Threshold > (int)variables[UniqueId];
+                        case FSMConditionVariableEquation.LessOrEqualThen:
+                            return IntCondition_Threshold >= (int)variables[UniqueId];
                         case FSMConditionVariableEquation.Equal:
                             return IntCondition_Threshold == (int)variables[UniqueId];
-                        case FSMConditionVariableEquation.GreaterOrEqual:
-                            return IntCondition_Threshold >= (int)variables[UniqueId];
+                        case FSMConditionVariableEquation.GreatOrEqualThen:
+                            return IntCondition_Threshold <= (int)variables[UniqueId];
                         case FSMConditionVariableEquation.GreaterThen:
-                            return IntCondition_Threshold > (int)variables[UniqueId];
+                            return IntCondition_Threshold < (int)variables[UniqueId];
                     }
                     return false;
                 case FSMConditionVariableType.Float:
                     switch (NumericCondition_EquationType)
                     {
                         case FSMConditionVariableEquation.LesserThen:
-                            return FloatCondition_Threshold < (float)variables[UniqueId];
-                        case FSMConditionVariableEquation.LessOrEqual:
-                            return FloatCondition_Threshold <= (float)variables[UniqueId];
+                            return FloatCondition_Threshold > (float)variables[UniqueId];
+                        case FSMConditionVariableEquation.LessOrEqualThen:
+                            return FloatCondition_Threshold >= (float)variables[UniqueId];
                         case FSMConditionVariableEquation.Equal:
                             return FloatCondition_Threshold == (float)variables[UniqueId];
-                        case FSMConditionVariableEquation.GreaterOrEqual:
-                            return FloatCondition_Threshold >= (float)variables[UniqueId];
+                        case FSMConditionVariableEquation.GreatOrEqualThen:
+                            return FloatCondition_Threshold <= (float)variables[UniqueId];
                         case FSMConditionVariableEquation.GreaterThen:
-                            return FloatCondition_Threshold > (float)variables[UniqueId];
+                            return FloatCondition_Threshold < (float)variables[UniqueId];
                     }
                     return false;
             }

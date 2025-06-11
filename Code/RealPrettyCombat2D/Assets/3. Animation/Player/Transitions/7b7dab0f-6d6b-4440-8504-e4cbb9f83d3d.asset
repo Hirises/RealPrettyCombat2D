@@ -10,20 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b39990bb1392e984cacf978a1a11123f, type: 3}
-  m_Name: 6257057e-ba47-426d-9c6c-99e425250790
+  m_Name: 7b7dab0f-6d6b-4440-8504-e4cbb9f83d3d
   m_EditorClassIdentifier: 
-  From: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
-  To: {fileID: 11400000, guid: 57c6cc508d7f7824bb0166800addb7e3, type: 2}
-  priority: 5
+  From: {fileID: 11400000, guid: ddf65994d887a5741af0bfad4d49f98d, type: 2}
+  To: {fileID: 11400000, guid: 8e224817afc10204784e2546a64da379, type: 2}
+  priority: 0
   Conditions:
-  - Type: 0
-    UniqueId: Jump
+  - Type: 2
+    UniqueId: ComboCount
     BoolCondition_Ture: 0
-    NumericCondition_EquationType: 0
+    NumericCondition_EquationType: 3
     IntCondition_Threshold: 0
     FloatCondition_Threshold: 0
-  TransitionTiming: 2
-  CustomCancleFrames:
-  - {x: 0, y: 10}
+  TransitionTiming: 0
+  CustomCancleFrames: []
   UseInputBuffer: 0
   CustomInputBufferFrames: []

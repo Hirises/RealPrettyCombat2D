@@ -3309,6 +3309,7 @@ MonoBehaviour:
   sprintspeed: 7
   jumpforce: 12
   maxJumpCount: 2
+  comboResetTime: 0.2
 --- !u!114 &1869956323
 MonoBehaviour:
   m_ObjectHideFlags: 0
